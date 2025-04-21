@@ -23,9 +23,13 @@ patches:
     version: v1
 - path: patches/eks-xrd-variables.yaml
   target:
+    group: apiextensions.crossplane.io
     kind: CompositeResourceDefinition
     name: xekscluster.aws.platform.example.org
+    version: v1
 - path: patches/eks-composition-variables.yaml
   target:
+    group: apiextensions.crossplane.io
     kind: Composition
     name: eks.aws.platform.example.org
+    version: v1

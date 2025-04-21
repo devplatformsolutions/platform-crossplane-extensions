@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: platform-crossplane-extensions
+  name: platform-crossplane-extensions-a
   namespace: argocd
 spec:
   project: default

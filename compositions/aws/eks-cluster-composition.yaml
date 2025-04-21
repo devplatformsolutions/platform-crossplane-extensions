@@ -37,12 +37,11 @@ spec:
             tags:
               Name: eks-public-1
               "kubernetes.io/role/elb": "1"
+            vpcIdSelector:
+              matchControllerRef: true
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
-        - fromFieldPath: "status.atProvider.id"
-          fromResource: vpc
-          toFieldPath: spec.forProvider.vpcId
 
     # Public Subnet 2
     - name: publicsubnet2
@@ -57,12 +56,11 @@ spec:
             tags:
               Name: eks-public-2
               "kubernetes.io/role/elb": "1"
+            vpcIdSelector:
+              matchControllerRef: true
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
-        - fromFieldPath: "status.atProvider.id"
-          fromResource: vpc
-          toFieldPath: spec.forProvider.vpcId
 
     # IAM Role for EKS Cluster
     - name: eksclusterrole
@@ -93,10 +91,8 @@ spec:
         spec:
           forProvider:
             policyArn: arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
-      patches:
-        - fromFieldPath: "status.atProvider.name"
-          fromResource: eksclusterrole
-          toFieldPath: spec.forProvider.role
+            roleSelector:
+              matchControllerRef: true
 
     # EKS Cluster
     - name: ekscluster
@@ -117,9 +113,6 @@ spec:
           toFieldPath: spec.forProvider.region
         - fromFieldPath: spec.clusterVersion
           toFieldPath: spec.forProvider.version
-        - fromFieldPath: "status.atProvider.name"
-          fromResource: eksclusterrole
-          toFieldPath: spec.forProvider.roleArn
 
     # IAM Role for Node Group
     - name: eksnodegrouprole

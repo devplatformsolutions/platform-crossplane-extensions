@@ -1,7 +1,7 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: xekscluster.aws.platform.example.org
+  name: xeksclusters.aws.platform.example.org
 spec:
   group: aws.platform.example.org
   names:

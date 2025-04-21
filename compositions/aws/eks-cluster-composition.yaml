@@ -14,7 +14,14 @@ spec:
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: VPC
+        metadata:
+          namespace: crossplane-system
+          name: eks-vpc
+          annotations:
+            meta.upbound.io/example-id: ec2/v1beta1/vpc
         spec:
+          providerConfigRef:
+            name: default 
           forProvider:
             cidrBlock: 10.0.0.0/16
             enableDnsSupport: true
@@ -30,7 +37,14 @@ spec:
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: Subnet
+        metadata:
+          name: eks-public-1
+          namespace: crossplane-system
+          annotations:
+            meta.upbound.io/example-id: ec2/v1beta1/subnet
         spec:
+          providerConfigRef:
+            name: default
           forProvider:
             cidrBlock: 10.0.1.0/24
             mapPublicIpOnLaunch: true
@@ -48,7 +62,14 @@ spec:
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: Subnet
+        metadata:
+          name: eks-public-2
+          namespace: crossplane-system
+          annotations:
+            meta.upbound.io/example-id: ec2/v1beta1/subnet
         spec:
+          providerConfigRef:
+            name: default
           forProvider:
             cidrBlock: 10.0.2.0/24
             mapPublicIpOnLaunch: true
@@ -68,8 +89,13 @@ spec:
         apiVersion: iam.aws.upbound.io/v1beta1
         kind: Role
         metadata:
+          namespace: crossplane-system
+          annotations:
+            meta.upbound.io/example-id: iam/v1beta1/role
           name: eks-cluster-role 
         spec:
+          providerConfigRef:
+            name: default
           forProvider:
             assumeRolePolicy: |
               {
@@ -90,7 +116,14 @@ spec:
       base:
         apiVersion: iam.aws.upbound.io/v1beta1
         kind: RolePolicyAttachment
+        metadata:
+          name: eks-cluster-role-policy
+          namespace: crossplane-system
+          annotations:
+            meta.upbound.io/example-id: iam/v1beta1/rolepolicyattachment
         spec:
+          providerConfigRef:
+            name: default
           forProvider:
             policyArn: arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
             roleSelector:
@@ -101,7 +134,14 @@ spec:
       base:
         apiVersion: eks.aws.upbound.io/v1beta1
         kind: Cluster
+        metadata:
+          name: eks-cluster
+          namespace: crossplane-system
+          annotations:
+            meta.upbound.io/example-id: eks/v1beta1/cluster
         spec:
+          providerConfigRef:
+            name: default
           forProvider:
             # roleArnSelector:
             #   matchControllerRef: true
@@ -126,7 +166,14 @@ spec:
       base:
         apiVersion: iam.aws.upbound.io/v1beta1
         kind: Role
+        metadata:
+          name: eks-node-group-role
+          namespace: crossplane-system
+          annotations:
+            meta.upbound.io/example-id: iam/v1beta1/role
         spec:
+          providerConfigRef:
+            name: default
           forProvider:
             assumeRolePolicy: |
               {
@@ -151,7 +198,14 @@ spec:
       base:
         apiVersion: eks.aws.upbound.io/v1beta1
         kind: NodeGroup
+        metadata:
+          name: eks-node-group
+          namespace: crossplane-system
+          annotations:
+            meta.upbound.io/example-id: eks/v1beta1/nodegroup
         spec:
+          providerConfigRef:
+            name: default
           forProvider:
             clusterNameSelector:
               matchControllerRef: true

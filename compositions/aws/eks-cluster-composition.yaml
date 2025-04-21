@@ -33,7 +33,7 @@ spec:
           transforms:
             - type: string
               string:
-                fmt: "eks-vpc-%s"
+                fmt: "eks-vpc"
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region

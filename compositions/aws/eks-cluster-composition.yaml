@@ -151,6 +151,10 @@ spec:
           providerConfigRef:
             name: default
           forProvider:
+            forProvider:
+              roleArnSelector:
+                matchLabels:
+                  cluster-name: ""
             # roleArnSelector:
             #   matchControllerRef: true
             # roleArn: ""

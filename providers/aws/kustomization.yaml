@@ -8,3 +8,4 @@ resources:
 - eks-provider.yaml
 - iam-provider.yaml
 - kms-provider.yaml
+- aws-provider.yaml

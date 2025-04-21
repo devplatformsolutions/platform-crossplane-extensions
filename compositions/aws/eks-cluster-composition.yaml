@@ -67,6 +67,8 @@ spec:
       base:
         apiVersion: iam.aws.upbound.io/v1beta1
         kind: Role
+        metadata:
+          name: eks-cluster-role 
         spec:
           forProvider:
             assumeRolePolicy: |
@@ -101,8 +103,9 @@ spec:
         kind: Cluster
         spec:
           forProvider:
-            roleArnSelector:
-              matchControllerRef: true
+            # roleArnSelector:
+            #   matchControllerRef: true
+            roleArn: "arn:aws:iam::${AWS_ACCOUNT_ID}:role/eks-cluster-role"
             vpcConfig:
               - endpointPrivateAccess: true
                 endpointPublicAccess: true
@@ -113,6 +116,19 @@ spec:
           toFieldPath: spec.forProvider.region
         - fromFieldPath: spec.clusterVersion
           toFieldPath: spec.forProvider.version
+        - type: FromCompositeFieldPath
+          fromFieldPath: "eksclusterrole"
+          toFieldPath: "spec.forProvider.roleArn"
+          transforms:
+            - type: string
+              string:
+                fmt: "arn:aws:iam::%s:role/%s"
+                type: Format
+                variables:
+                  - fromFieldPath: "status.atProvider.accountId"
+                    source: eksclusterrole
+                  - fromFieldPath: "status.atProvider.name"
+                    source: eksclusterrole
 
     # IAM Role for Node Group
     - name: eksnodegrouprole

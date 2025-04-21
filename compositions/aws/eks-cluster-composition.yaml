@@ -92,6 +92,8 @@ spec:
           namespace: crossplane-system
           annotations:
             meta.upbound.io/example-id: iam/v1beta1/role
+          labels:
+            cluster-name: eks-cluster
           name: eks-cluster-role 
         spec:
           providerConfigRef:
@@ -110,6 +112,10 @@ spec:
                   }
                 ]
               }
+      patches:
+        # Add this patch to dynamically set the label from the composite resource name
+        - fromFieldPath: metadata.name
+          toFieldPath: metadata.labels.cluster-name
 
     # Attach AmazonEKSClusterPolicy to the role
     - name: eksclustersrolepolicy

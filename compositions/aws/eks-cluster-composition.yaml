@@ -37,6 +37,9 @@ spec:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
+        - type: ToCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: status.vpcName
 
     # Internet Gateway
     - name: igw
@@ -49,9 +52,13 @@ spec:
         spec:
           forProvider:
             vpcIdRef:
-              name: eks-vpc
+              name: ""
           providerConfigRef:
             name: default
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: status.vpcName
+          toFieldPath: spec.forProvider.vpcIdRef.name
 
     # Public Subnet 1
     - name: publicsubnet1
@@ -70,13 +77,16 @@ spec:
               Name: eks-public-1
               "kubernetes.io/role/elb": "1"
             vpcIdRef:
-              name: eks-vpc
+              name: ""
           providerConfigRef:
             name: default
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
+        - type: FromCompositeFieldPath
+          fromFieldPath: status.vpcName
+          toFieldPath: spec.forProvider.vpcIdRef.name
 
     # Public Subnet 2
     - name: publicsubnet2
@@ -95,13 +105,16 @@ spec:
               Name: eks-public-2
               "kubernetes.io/role/elb": "1"
             vpcIdRef:
-              name: eks-vpc
+              name: ""
           providerConfigRef:
             name: default
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
+        - type: FromCompositeFieldPath
+          fromFieldPath: status.vpcName
+          toFieldPath: spec.forProvider.vpcIdRef.name
 
     # EKS Cluster Role
     - name: eksclusterrole

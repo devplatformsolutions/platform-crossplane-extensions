@@ -21,21 +21,26 @@ spec:
             spec:
               type: object
               properties:
-                clusterVersion:
-                  type: string
-                  description: "EKS cluster version (e.g. 1.28)"
-                  default: "1.28"
-                region:
-                  type: string
-                  description: "AWS region"
-                  default: "us-west-2"
-                nodeSize:
-                  type: string
-                  description: "EC2 instance type for worker nodes"
-                  default: "t3.medium"
-                nodeCount:
-                  type: integer
-                  description: "Number of worker nodes"
-                  default: 2
+                parameters:
+                  type: object
+                  properties:
+                    clusterVersion:
+                      type: string
+                      description: "EKS cluster version (e.g. 1.28)"
+                      default: "1.28"
+                    region:
+                      type: string
+                      description: "AWS region"
+                      default: "us-west-2"
+                    nodeSize:
+                      type: string
+                      description: "EC2 instance type for worker nodes"
+                      default: "t3.medium"
+                    nodeCount:
+                      type: integer
+                      description: "Number of worker nodes"
+                      default: 2
+                  required:
+                    - region
               required:
-                - region
+                - parameters

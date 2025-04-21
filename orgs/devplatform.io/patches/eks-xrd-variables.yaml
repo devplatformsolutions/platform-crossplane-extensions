@@ -1,6 +1,6 @@
 - op: replace
   path: /metadata/name
-  value: xekscluster.aws.devplatform.io
+  value: xeksclusters.aws.devplatform.io
 
 - op: replace
   path: /spec/group

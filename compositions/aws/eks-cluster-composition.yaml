@@ -139,6 +139,8 @@ spec:
           namespace: crossplane-system
           annotations:
             meta.upbound.io/example-id: eks/v1beta1/cluster
+          labels:
+            cluster-name: eks-cluster
         spec:
           providerConfigRef:
             name: default
@@ -208,7 +210,8 @@ spec:
             name: default
           forProvider:
             clusterNameSelector:
-              matchControllerRef: true
+              matchLabels:
+                cluster-name: ""
             nodeRoleArnSelector:
               matchControllerRef: true
             subnetIdSelector:
@@ -224,3 +227,5 @@ spec:
           toFieldPath: spec.forProvider.scalingConfig[0].desiredSize
         - fromFieldPath: spec.nodeSize
           toFieldPath: spec.forProvider.instanceTypes[0]
+        - fromFieldPath: metadata.name
+          toFieldPath: spec.forProvider.clusterNameSelector.matchLabels.cluster-name

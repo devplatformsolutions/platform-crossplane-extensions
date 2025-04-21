@@ -21,3 +21,11 @@ patches:
     kind: Composition
     name: awsec2dynamodbinstances.myorg.io
     version: v1
+- path: patches/eks-xrd-variables.yaml
+  target:
+    kind: CompositeResourceDefinition
+    name: xekscluster.aws.platform.example.org
+- path: patches/eks-composition-variables.yaml
+  target:
+    kind: Composition
+    name: eks.aws.platform.example.org

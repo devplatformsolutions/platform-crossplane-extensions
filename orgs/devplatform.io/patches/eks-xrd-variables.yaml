@@ -1,0 +1,11 @@
+- op: replace
+  path: /metadata/name
+  value: xekscluster.aws.devplatform.io
+
+- op: replace
+  path: /spec/group
+  value: aws.devplatform.io
+
+- op: replace
+  path: /spec/versions/0/name
+  value: v1alpha1

@@ -1,0 +1,7 @@
+- op: replace
+  path: /metadata/name
+  value: eks.aws.devplatform.io
+
+- op: replace
+  path: /spec/compositeTypeRef/apiVersion
+  value: aws.devplatform.io/v1alpha1

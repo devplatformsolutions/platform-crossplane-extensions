@@ -1,0 +1,168 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: eks.aws.platform.example.org
+  labels:
+    provider: aws
+spec:
+  compositeTypeRef:
+    apiVersion: aws.platform.example.org/v1alpha1
+    kind: XEKSCluster
+  resources:
+    # VPC for the EKS cluster
+    - name: vpc
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: VPC
+        spec:
+          forProvider:
+            cidrBlock: 10.0.0.0/16
+            enableDnsSupport: true
+            enableDnsHostnames: true
+            tags:
+              Name: eks-vpc
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+
+    # Public Subnet 1
+    - name: publicsubnet1
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: Subnet
+        spec:
+          forProvider:
+            cidrBlock: 10.0.1.0/24
+            mapPublicIpOnLaunch: true
+            tags:
+              Name: eks-public-1
+              "kubernetes.io/role/elb": "1"
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+        - fromFieldPath: "status.atProvider.id"
+          fromResource: vpc
+          toFieldPath: spec.forProvider.vpcId
+
+    # Public Subnet 2
+    - name: publicsubnet2
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: Subnet
+        spec:
+          forProvider:
+            cidrBlock: 10.0.2.0/24
+            mapPublicIpOnLaunch: true
+            availabilityZoneSuffix: "b"
+            tags:
+              Name: eks-public-2
+              "kubernetes.io/role/elb": "1"
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+        - fromFieldPath: "status.atProvider.id"
+          fromResource: vpc
+          toFieldPath: spec.forProvider.vpcId
+
+    # IAM Role for EKS Cluster
+    - name: eksclusterrole
+      base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: Role
+        spec:
+          forProvider:
+            assumeRolePolicy: |
+              {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "eks.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+              }
+
+    # Attach AmazonEKSClusterPolicy to the role
+    - name: eksclustersrolepolicy
+      base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: RolePolicyAttachment
+        spec:
+          forProvider:
+            policyArn: arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+      patches:
+        - fromFieldPath: "status.atProvider.name"
+          fromResource: eksclusterrole
+          toFieldPath: spec.forProvider.role
+
+    # EKS Cluster
+    - name: ekscluster
+      base:
+        apiVersion: eks.aws.upbound.io/v1beta1
+        kind: Cluster
+        spec:
+          forProvider:
+            roleArnSelector:
+              matchControllerRef: true
+            vpcConfig:
+              endpointPrivateAccess: true
+              endpointPublicAccess: true
+              subnetIdSelector:
+                matchControllerRef: true
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+        - fromFieldPath: spec.clusterVersion
+          toFieldPath: spec.forProvider.version
+        - fromFieldPath: "status.atProvider.name"
+          fromResource: eksclusterrole
+          toFieldPath: spec.forProvider.roleArn
+
+    # IAM Role for Node Group
+    - name: eksnodegrouprole
+      base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: Role
+        spec:
+          forProvider:
+            assumeRolePolicy: |
+              {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "ec2.amazonaws.com"
+                    },
+                    "Action": "sts:AssumeRole"
+                  }
+                ]
+              }
+
+    # EKS Node Group
+    - name: eksnodegroup
+      base:
+        apiVersion: eks.aws.upbound.io/v1beta1
+        kind: NodeGroup
+        spec:
+          forProvider:
+            clusterNameSelector:
+              matchControllerRef: true
+            nodeRoleArnSelector:
+              matchControllerRef: true
+            subnetIdSelector:
+              matchControllerRef: true
+            scalingConfig:
+              desiredSize: 2
+              maxSize: 4
+              minSize: 1
+      patches:
+        - fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+        - fromFieldPath: spec.nodeCount
+          toFieldPath: spec.forProvider.scalingConfig.desiredSize
+        - fromFieldPath: spec.nodeSize
+          toFieldPath: spec.forProvider.instanceTypes[0]

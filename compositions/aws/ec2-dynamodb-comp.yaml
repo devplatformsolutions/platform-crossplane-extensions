@@ -1,0 +1,82 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: compositeec2dynamodbinstances.myorg.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "55"
+spec:
+  compositeTypeRef:
+    apiVersion: myorg.io/v1alpha1
+    kind: CompositeEC2DynamoDBInstance
+  resources:
+    - name: ec2instance
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta2
+        kind: Instance
+        metadata:
+          annotations:
+            meta.upbound.io/example-id: ec2/v1beta2/instance
+          labels:
+            testing.upbound.io/example-name: sample-instance
+          name: sample-instance
+        spec:
+          forProvider:
+            ami: ami-00a929b66ed6e0de6
+            creditSpecification:
+              cpuCredits: unlimited
+            instanceType: t2.micro
+            region: us-east-1
+          providerConfigRef:
+            name: default
+      patches:
+        # Patch the instance type.
+        - type: FromCompositeFieldPath
+          fromFieldPath: "spec.instanceType"
+          toFieldPath: "spec.forProvider.instanceType"
+        # Patch the subnet ID.
+        # - type: FromCompositeFieldPath
+        #   fromFieldPath: "spec.subnetID"
+        #   toFieldPath: "spec.forProvider.subnetId"
+        # # Patch the security group IDs.
+        # - type: FromCompositeFieldPath
+        #   fromFieldPath: "spec.securityGroupIDs"
+        #   toFieldPath: "spec.forProvider.vpcSecurityGroupIds"
+    # 3. Create the DynamoDB Table.
+    - name: dynamodbtable
+      base:
+        apiVersion: dynamodb.aws.upbound.io/v1beta2
+        kind: Table
+        metadata:
+          annotations:
+            meta.upbound.io/example-id: dynamodb/v1beta2/table
+          name: example
+          namespace: crossplane-system
+        spec:
+          providerConfigRef:
+            name: default 
+          forProvider:
+            attribute:
+              - name: UserId
+                type: S
+              - name: GameTitle
+                type: S
+              - name: TopScore
+                type: S
+            billingMode: PROVISIONED
+            globalSecondaryIndex:
+              - hashKey: GameTitle
+                name: GameTitleIndex
+                nonKeyAttributes:
+                  - UserId
+                projectionType: INCLUDE
+                rangeKey: TopScore
+                readCapacity: 10
+                writeCapacity: 10
+            hashKey: UserId
+            rangeKey: GameTitle
+            readCapacity: 20
+            region: us-east-1
+            tags:
+              Environment: production
+              Name: dynamodb-table-1
+            writeCapacity: 20

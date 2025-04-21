@@ -1,0 +1,28 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: compositeec2dynamodbinstances.myorg.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "50"
+spec:
+  group: myorg.io
+  names:
+    kind: CompositeEC2DynamoDBInstance
+    plural: compositeec2dynamodbinstances
+  claimNames:
+    kind: EC2DynamoDBInstance
+    plural: ec2dynamodbinstances
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                instanceType:
+                  type: string
+                  description: "The EC2 instance type to provision."

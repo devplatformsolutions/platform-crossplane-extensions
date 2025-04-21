@@ -4,16 +4,3 @@ metadata:
   name: upbound-provider-aws-iam
 spec:
   package: xpkg.upbound.io/upbound/provider-aws-iam:v1.21.1
-  controllerConfigRef:
-    name: aws-iam-controller-config
-
----
-
-apiVersion: pkg.crossplane.io/v1alpha1
-kind: ControllerConfig
-metadata:
-  name: aws-iam-controller-config
-spec:
-  serviceAccountName: aws-iam-provider-sa
-  args:
-    - --enable-management-policies

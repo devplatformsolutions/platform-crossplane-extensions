@@ -3,9 +3,9 @@ kind: Kustomization
 
 resources:
 - aws-provider.yaml
-- ec2-provider.yaml
-- dynamodb-provider.yaml
-- s3-provider.yaml
-- eks-provider.yaml
-- iam-provider.yaml
-- kms-provider.yaml
+# - ec2-provider.yaml
+# - dynamodb-provider.yaml
+# - s3-provider.yaml
+# - eks-provider.yaml
+# - iam-provider.yaml
+# - kms-provider.yaml

@@ -116,19 +116,10 @@ spec:
           toFieldPath: spec.forProvider.region
         - fromFieldPath: spec.clusterVersion
           toFieldPath: spec.forProvider.version
+        # Use roleArnSelector instead of direct ARN construction
         - type: FromCompositeFieldPath
-          fromFieldPath: "eksclusterrole"
-          toFieldPath: "spec.forProvider.roleArn"
-          transforms:
-            - type: string
-              string:
-                fmt: "arn:aws:iam::%s:role/%s"
-                type: Format
-                variables:
-                  - fromFieldPath: "status.atProvider.accountId"
-                    source: eksclusterrole
-                  - fromFieldPath: "status.atProvider.name"
-                    source: eksclusterrole
+          fromFieldPath: "metadata.name"
+          toFieldPath: spec.forProvider.roleArnSelector.matchLabels.cluster-name
 
     # IAM Role for Node Group
     - name: eksnodegrouprole
@@ -150,6 +141,10 @@ spec:
                   }
                 ]
               }
+      patches:
+        # Add this patch to set the label from composite name
+        - fromFieldPath: metadata.name
+          toFieldPath: metadata.labels.cluster-name
 
     # EKS Node Group
     - name: eksnodegroup

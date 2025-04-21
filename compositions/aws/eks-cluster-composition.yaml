@@ -104,10 +104,10 @@ spec:
             roleArnSelector:
               matchControllerRef: true
             vpcConfig:
-              endpointPrivateAccess: true
-              endpointPublicAccess: true
-              subnetIdSelector:
-                matchControllerRef: true
+              - endpointPrivateAccess: true
+                endpointPublicAccess: true
+                subnetIdSelector:
+                  matchControllerRef: true
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
@@ -149,13 +149,13 @@ spec:
             subnetIdSelector:
               matchControllerRef: true
             scalingConfig:
-              desiredSize: 2
-              maxSize: 4
-              minSize: 1
+              - desiredSize: 2
+                maxSize: 4
+                minSize: 1
       patches:
         - fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
         - fromFieldPath: spec.nodeCount
-          toFieldPath: spec.forProvider.scalingConfig.desiredSize
+          toFieldPath: spec.forProvider.scalingConfig[0].desiredSize
         - fromFieldPath: spec.nodeSize
           toFieldPath: spec.forProvider.instanceTypes[0]

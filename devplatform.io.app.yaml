@@ -8,18 +8,6 @@ spec:
   source:
     repoURL: 'https://github.com/devplatformsolutions/platform-crossplane-extensions.git'
     path: 'orgs/devplatform.io'
-    targetRevision: HEAD
-    kustomize:
-      buildOptions: "--enable-alpha-plugins"
-      commonLabels:
-        app.kubernetes.io/managed-by: argocd
-      commonAnnotations:
-        app.kubernetes.io/part-of: platform-crossplane-extensions
-      vars:
-        - name: ORG_DOMAIN
-          value: devplatform.io
-        - name: API_VERSION
-          value: v1alpha1
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: crossplane-system

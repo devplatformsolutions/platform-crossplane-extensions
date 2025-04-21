@@ -2,23 +2,18 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-- xrds/aws/ec2-dynamodb-xrd.yaml
+- ../../xrds/aws
+- ../../compositions/aws
 # Add other resources as needed
-# - compositions/aws/ec2-dynamodb-comp.yaml
 
 patches:
-- patch: |-
-    - op: replace
-      path: /metadata/name
-      value: compositeec2dynamodbinstances.$(ORG_DOMAIN)
-    - op: replace
-      path: /spec/group
-      value: $(ORG_DOMAIN)
-    - op: replace
-      path: /spec/versions/0/name
-      value: $(API_VERSION)
+- path: patches/xrd-variables.yaml
   target:
-    group: apiextensions.crossplane.io
-    version: v1
     kind: CompositeResourceDefinition
     name: compositeec2dynamodbinstances.myorg.io
+- path: patches/composition-variables.yaml
+  target:
+    group: apiextensions.crossplane.io
+    kind: Composition
+    name: compositeec2dynamodbinstances.myorg.io
+    version: v1

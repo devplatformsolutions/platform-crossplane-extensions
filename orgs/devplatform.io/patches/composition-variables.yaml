@@ -1,0 +1,16 @@
+# apiVersion: apiextensions.crossplane.io/v1
+# kind: Composition
+# metadata:
+#   name: compositeec2dynamodbinstances.devplatform.io
+# spec:
+#   compositeTypeRef:
+#     apiVersion: devplatform.io/v1alpha1
+#     kind: CompositeEC2DynamoDBInstance
+
+- op: replace
+  path: /metadata/name
+  value: compositeec2dynamodbinstances.devplatform.io
+
+- op: replace
+  path: /spec/compositeTypeRef/apiVersion
+  value: devplatform.io/v1alpha1

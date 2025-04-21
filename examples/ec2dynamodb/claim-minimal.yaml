@@ -1,0 +1,6 @@
+apiVersion: myorg.io/v1alpha1
+kind: EC2DynamoDBInstance
+metadata:
+  name: dev-minimal-instance
+spec:
+  instanceType: t2.micro

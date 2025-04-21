@@ -1,0 +1,17 @@
+apiVersion: myorg.io/v1alpha1
+kind: EC2DynamoDBInstance
+metadata:
+  name: prod-advanced-instance
+  annotations:
+    owner: "team-ops"       # Custom metadata
+    environment: "production"
+spec:
+  instanceType: t3.large    # Overrides default
+  # Uncomment and use if your Composition supports these patches:
+  # subnetID: "subnet-123456"  
+  # securityGroupIDs: ["sg-123456"]
+  # dynamoDBConfig:          # Hypothetical extension
+  #   readCapacity: 50
+  #   writeCapacity: 50
+  #   tags:
+  #     CostCenter: "finance"

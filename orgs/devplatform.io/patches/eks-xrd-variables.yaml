@@ -9,3 +9,11 @@
 - op: replace
   path: /spec/versions/0/name
   value: v1alpha1
+
+- op: replace
+  path: /spec/versions/0/served
+  value: true
+
+- op: replace
+  path: /spec/versions/0/referenceable
+  value: true

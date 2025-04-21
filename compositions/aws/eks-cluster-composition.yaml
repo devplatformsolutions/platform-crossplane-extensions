@@ -9,23 +9,23 @@ spec:
     apiVersion: aws.platform.example.org/v1alpha1
     kind: XEKSCluster
   resources:
-    # VPC Configuration
+    # VPC
     - name: vpc
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: VPC
         metadata:
-          namespace: crossplane-system
           name: eks-vpc
+          namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default 
           forProvider:
             cidrBlock: 10.0.0.0/16
             enableDnsSupport: true
             enableDnsHostnames: true
             tags:
               Name: eks-vpc
+          providerConfigRef:
+            name: default
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: metadata.name
@@ -47,15 +47,13 @@ spec:
           name: eks-igw
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             vpcIdRef:
               name: eks-vpc
-      dependsOn:
-        - vpc
+          providerConfigRef:
+            name: default
 
-    # Public Subnets
+    # Public Subnet 1
     - name: publicsubnet1
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
@@ -64,23 +62,23 @@ spec:
           name: eks-public-1
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             cidrBlock: 10.0.1.0/24
             mapPublicIpOnLaunch: true
+            availabilityZone: "a"
             tags:
               Name: eks-public-1
               "kubernetes.io/role/elb": "1"
             vpcIdRef:
               name: eks-vpc
+          providerConfigRef:
+            name: default
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
-      dependsOn:
-        - vpc
 
+    # Public Subnet 2
     - name: publicsubnet2
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
@@ -89,8 +87,6 @@ spec:
           name: eks-public-2
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             cidrBlock: 10.0.2.0/24
             mapPublicIpOnLaunch: true
@@ -100,24 +96,22 @@ spec:
               "kubernetes.io/role/elb": "1"
             vpcIdRef:
               name: eks-vpc
+          providerConfigRef:
+            name: default
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
-      dependsOn:
-        - vpc
 
-    # EKS Cluster Role with Policies
+    # EKS Cluster Role
     - name: eksclusterrole
       base:
         apiVersion: iam.aws.upbound.io/v1beta1
         kind: Role
         metadata:
-          namespace: crossplane-system
           name: eks-cluster-role
+          namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             assumeRolePolicy: |
               {
@@ -128,6 +122,8 @@ spec:
                   "Action": "sts:AssumeRole"
                 }]
               }
+          providerConfigRef:
+            name: default
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: metadata.name
@@ -137,6 +133,7 @@ spec:
               string:
                 fmt: "eks-cluster-role-%s"
 
+    # Cluster Policy Attachments
     - name: eks-cluster-policy
       base:
         apiVersion: iam.aws.upbound.io/v1beta1
@@ -145,14 +142,12 @@ spec:
           name: eks-cluster-policy
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
             roleRef:
               name: eks-cluster-role
-      dependsOn:
-        - eksclusterrole
+          providerConfigRef:
+            name: default
 
     - name: eks-service-policy
       base:
@@ -162,14 +157,12 @@ spec:
           name: eks-service-policy
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
             roleRef:
               name: eks-cluster-role
-      dependsOn:
-        - eksclusterrole
+          providerConfigRef:
+            name: default
 
     # EKS Cluster
     - name: ekscluster
@@ -180,8 +173,6 @@ spec:
           name: eks-cluster
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             roleArnRef:
               name: eks-cluster-role
@@ -192,19 +183,17 @@ spec:
                 subnetRefs:
                   - name: publicsubnet1
                   - name: publicsubnet2
+          providerConfigRef:
+            name: default
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
         - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.version
+          fromFieldPath: spec.parameters.clusterVersion
           toFieldPath: spec.forProvider.version
-      dependsOn:
-        - eksclusterrole
-        - publicsubnet1
-        - publicsubnet2
 
-    # Node Group Role with Required Policies
+    # Node Group Role
     - name: eksnodegrouprole
       base:
         apiVersion: iam.aws.upbound.io/v1beta1
@@ -213,8 +202,6 @@ spec:
           name: eks-node-group-role
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             assumeRolePolicy: |
               {
@@ -225,6 +212,8 @@ spec:
                   "Action": "sts:AssumeRole"
                 }]
               }
+          providerConfigRef:
+            name: default
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: metadata.name
@@ -234,7 +223,7 @@ spec:
               string:
                 fmt: "eks-node-role-%s"
 
-    # Attach Node Group Policies
+    # Node Group Policy Attachments
     - name: node-worker-policy
       base:
         apiVersion: iam.aws.upbound.io/v1beta1
@@ -243,14 +232,12 @@ spec:
           name: node-worker-policy
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
             roleRef:
               name: eks-node-group-role
-      dependsOn:
-        - eksnodegrouprole
+          providerConfigRef:
+            name: default
 
     - name: node-cni-policy
       base:
@@ -260,14 +247,12 @@ spec:
           name: node-cni-policy
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
             roleRef:
               name: eks-node-group-role
-      dependsOn:
-        - eksnodegrouprole
+          providerConfigRef:
+            name: default
 
     - name: node-ecr-policy
       base:
@@ -277,48 +262,12 @@ spec:
           name: node-ecr-policy
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
             roleRef:
               name: eks-node-group-role
-      dependsOn:
-        - eksnodegrouprole
-
-    - name: node-ssm-policy
-      base:
-        apiVersion: iam.aws.upbound.io/v1beta1
-        kind: RolePolicyAttachment
-        metadata:
-          name: node-ssm-policy
-          namespace: crossplane-system
-        spec:
           providerConfigRef:
             name: default
-          forProvider:
-            policyArn: "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-            roleRef:
-              name: eks-node-group-role
-      dependsOn:
-        - eksnodegrouprole
-
-    - name: node-cloudwatch-policy
-      base:
-        apiVersion: iam.aws.upbound.io/v1beta1
-        kind: RolePolicyAttachment
-        metadata:
-          name: node-cloudwatch-policy
-          namespace: crossplane-system
-        spec:
-          providerConfigRef:
-            name: default
-          forProvider:
-            policyArn: "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
-            roleRef:
-              name: eks-node-group-role
-      dependsOn:
-        - eksnodegrouprole
 
     # EKS Node Group
     - name: eksnodegroup
@@ -329,8 +278,6 @@ spec:
           name: eks-node-group
           namespace: crossplane-system
         spec:
-          providerConfigRef:
-            name: default
           forProvider:
             clusterNameRef:
               name: eks-cluster
@@ -344,6 +291,8 @@ spec:
                 maxSize: 4
                 minSize: 1
             instanceTypes: ["t3.medium"]
+          providerConfigRef:
+            name: default
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -354,11 +303,3 @@ spec:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.nodeSize
           toFieldPath: spec.forProvider.instanceTypes[0]
-      dependsOn:
-        - ekscluster
-        - eksnodegrouprole
-        - node-worker-policy
-        - node-cni-policy
-        - node-ecr-policy
-        - node-ssm-policy
-        - node-cloudwatch-policy

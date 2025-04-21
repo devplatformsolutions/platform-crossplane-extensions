@@ -105,7 +105,7 @@ spec:
           forProvider:
             # roleArnSelector:
             #   matchControllerRef: true
-            roleArn: "arn:aws:iam::${AWS_ACCOUNT_ID}:role/eks-cluster-role"
+            # roleArn: ""
             vpcConfig:
               - endpointPrivateAccess: true
                 endpointPublicAccess: true

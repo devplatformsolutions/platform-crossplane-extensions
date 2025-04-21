@@ -10,10 +10,10 @@ patches:
 - path: patches/xrd-variables.yaml
   target:
     kind: CompositeResourceDefinition
-    name: compositeec2dynamodbinstances.myorg.io
+    name: awsec2dynamodbinstances.myorg.io
 - path: patches/composition-variables.yaml
   target:
     group: apiextensions.crossplane.io
     kind: Composition
-    name: compositeec2dynamodbinstances.myorg.io
+    name: awsec2dynamodbinstances.myorg.io
     version: v1

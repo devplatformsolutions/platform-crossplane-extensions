@@ -1,13 +1,13 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: compositeec2dynamodbinstances.myorg.io
+  name: awsec2dynamodbinstances.myorg.io
   annotations:
     argocd.argoproj.io/sync-wave: "55"
 spec:
   compositeTypeRef:
     apiVersion: myorg.io/v1alpha1
-    kind: CompositeEC2DynamoDBInstance
+    kind: AwsEC2DynamoDBInstance
   resources:
     - name: ec2instance
       base:

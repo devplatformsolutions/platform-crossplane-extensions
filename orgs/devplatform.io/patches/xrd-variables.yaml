@@ -1,7 +1,7 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: compositeec2dynamodbinstances.devplatform.io
+  name: awsec2dynamodbinstances.devplatform.io
 spec:
   group: devplatform.io
   versions:

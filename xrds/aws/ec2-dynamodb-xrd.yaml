@@ -3,7 +3,7 @@ kind: CompositeResourceDefinition
 metadata:
   name: awsec2dynamodbinstances.myorg.io
   annotations:
-    argocd.argoproj.io/sync-wave: "50"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   group: myorg.io
   names:

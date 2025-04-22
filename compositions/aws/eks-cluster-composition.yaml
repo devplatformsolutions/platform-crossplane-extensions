@@ -180,7 +180,7 @@ spec:
             vpcConfig:
               - endpointPrivateAccess: true
                 endpointPublicAccess: true
-                subnetSelector:
+                subnetIdSelector:
                   matchControllerRef: true
           providerConfigRef:
             name: default

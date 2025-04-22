@@ -211,8 +211,8 @@ spec:
               endpointPublicAccess: true
               subnetIdSelector:
                 matchControllerRef: true
-              securityGroupIdSelector:
-                matchControllerRef: true
+              # securityGroupIdSelector:
+              #   matchControllerRef: true
           providerConfigRef:
             name: default
       patches:

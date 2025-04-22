@@ -12,11 +12,11 @@
 
 - op: replace
   path: /metadata/name
-  value: awsec2dynamodbinstances.devplatform.io
+  value: awsec2dynamodbinstances.devplatforms.io
 
 - op: replace
   path: /spec/group
-  value: devplatform.io
+  value: devplatforms.io
 
 - op: replace
   path: /spec/versions/0/name

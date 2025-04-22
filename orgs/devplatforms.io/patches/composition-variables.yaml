@@ -9,8 +9,8 @@
 
 - op: replace
   path: /metadata/name
-  value: awsec2dynamodbinstances.devplatform.io
+  value: awsec2dynamodbinstances.devplatforms.io
 
 - op: replace
   path: /spec/compositeTypeRef/apiVersion
-  value: devplatform.io/v1alpha1
+  value: devplatforms.io/v1alpha1

@@ -178,10 +178,10 @@ spec:
               matchControllerRef: true
             version: "1.28"
             vpcConfig:
-              - endpointPrivateAccess: true
-                endpointPublicAccess: true
-                subnetIdSelector:
-                  matchControllerRef: true
+              endpointPrivateAccess: true
+              endpointPublicAccess: true
+              subnetIdSelector:
+                matchControllerRef: true
           providerConfigRef:
             name: default
       patches:

@@ -37,9 +37,6 @@ spec:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
-        # - type: ToCompositeFieldPath
-        #   fromFieldPath: metadata.name
-        #   toFieldPath: status.vpcName
 
     # Internet Gateway
     - name: igw
@@ -51,16 +48,10 @@ spec:
           namespace: crossplane-system
         spec:
           forProvider:
-            # vpcIdRef:
-            #   name: "eks-vpc"
             vpcIdSelector:
               matchControllerRef: true
           providerConfigRef:
             name: default
-      # patches:
-      #   - type: FromCompositeFieldPath
-      #     fromFieldPath: status.vpcName
-      #     toFieldPath: spec.forProvider.vpcIdRef.name
 
     # Public Subnet 1
     - name: publicsubnet1
@@ -78,8 +69,6 @@ spec:
             tags:
               Name: eks-public-1
               "kubernetes.io/role/elb": "1"
-            # vpcIdRef:
-            #   name: "eks-vpc"
             vpcIdSelector:
               matchControllerRef: true
           providerConfigRef:
@@ -88,9 +77,6 @@ spec:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
-        # - type: FromCompositeFieldPath
-        #   fromFieldPath: status.vpcName
-        #   toFieldPath: spec.forProvider.vpcIdRef.name
 
     # Public Subnet 2
     - name: publicsubnet2
@@ -108,8 +94,6 @@ spec:
             tags:
               Name: eks-public-2
               "kubernetes.io/role/elb": "1"
-            # vpcIdRef:
-            #   name: "eks-vpc"
             vpcIdSelector:
               matchControllerRef: true
           providerConfigRef:
@@ -118,9 +102,6 @@ spec:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
-        # - type: FromCompositeFieldPath
-        #   fromFieldPath: status.vpcName
-        #   toFieldPath: spec.forProvider.vpcIdRef.name
 
     # EKS Cluster Role
     - name: eksclusterrole
@@ -163,8 +144,8 @@ spec:
         spec:
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-            roleRef:
-              name: eks-cluster-role
+            roleSelector:
+              matchControllerRef: true
           providerConfigRef:
             name: default
 
@@ -178,8 +159,8 @@ spec:
         spec:
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-            roleRef:
-              name: eks-cluster-role
+            roleSelector:
+              matchControllerRef: true
           providerConfigRef:
             name: default
 
@@ -193,8 +174,8 @@ spec:
           namespace: crossplane-system
         spec:
           forProvider:
-            roleArnRef:
-              name: eks-cluster-role
+            roleArnSelector:
+              matchControllerRef: true
             version: "1.28"
             vpcConfig:
               - endpointPrivateAccess: true
@@ -253,8 +234,8 @@ spec:
         spec:
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-            roleRef:
-              name: eks-node-group-role
+            roleSelector:
+              matchControllerRef: true
           providerConfigRef:
             name: default
 
@@ -268,8 +249,8 @@ spec:
         spec:
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-            roleRef:
-              name: eks-node-group-role
+            roleSelector:
+              matchControllerRef: true
           providerConfigRef:
             name: default
 
@@ -283,8 +264,8 @@ spec:
         spec:
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-            roleRef:
-              name: eks-node-group-role
+            roleSelector:
+              matchControllerRef: true
           providerConfigRef:
             name: default
 
@@ -298,10 +279,10 @@ spec:
           namespace: crossplane-system
         spec:
           forProvider:
-            clusterNameRef:
-              name: eks-cluster
-            nodeRoleArnRef:
-              name: eks-node-group-role
+            clusterNameSelector:
+              matchControllerRef: true
+            nodeRoleArnSelector:
+              matchControllerRef: true
             subnetRefs:
               - name: publicsubnet1
               - name: publicsubnet2

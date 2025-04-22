@@ -180,9 +180,8 @@ spec:
             vpcConfig:
               - endpointPrivateAccess: true
                 endpointPublicAccess: true
-                subnetRefs:
-                  - name: publicsubnet1
-                  - name: publicsubnet2
+                subnetSelector:
+                  matchControllerRef: true
           providerConfigRef:
             name: default
       patches:

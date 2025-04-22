@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: 'https://github.com/devplatformsolutions/platform-crossplane-extensions.git'
-    path: 'orgs/devplatform.io'
+    path: 'orgs/devplatforms.io'
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: crossplane-system

@@ -103,34 +103,34 @@ spec:
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
 
-    - name: eks-cluster-sg
-      base:
-        apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: SecurityGroup
-        metadata:
-          name: eks-cluster-sg
-          namespace: crossplane-system
-        spec:
-          forProvider:
-            region: us-west-2
-            vpcIdSelector:
-              matchControllerRef: true
-            ingress:
-              - fromPort: 443
-                toPort: 443
-                protocol: tcp
-                cidrBlocks: ["0.0.0.0/0"]
-              - fromPort: 9443
-                toPort: 9443
-                protocol: tcp
-                cidrBlocks: ["0.0.0.0/0"]
-            egress:
-              - fromPort: 0
-                toPort: 0
-                protocol: "-1"
-                cidrBlocks: ["0.0.0.0/0"]
-          providerConfigRef:
-            name: default
+    # - name: eks-cluster-sg
+    #   base:
+    #     apiVersion: ec2.aws.upbound.io/v1beta1
+    #     kind: SecurityGroup
+    #     metadata:
+    #       name: eks-cluster-sg
+    #       namespace: crossplane-system
+    #     spec:
+    #       forProvider:
+    #         region: us-west-2
+    #         vpcIdSelector:
+    #           matchControllerRef: true
+    #         ingress:
+    #           - fromPort: 443
+    #             toPort: 443
+    #             protocol: tcp
+    #             cidrBlocks: ["0.0.0.0/0"]
+    #           - fromPort: 9443
+    #             toPort: 9443
+    #             protocol: tcp
+    #             cidrBlocks: ["0.0.0.0/0"]
+    #         egress:
+    #           - fromPort: 0
+    #             toPort: 0
+    #             protocol: "-1"
+    #             cidrBlocks: ["0.0.0.0/0"]
+    #       providerConfigRef:
+    #         name: default
 
     # EKS Cluster Role
     - name: eksclusterrole

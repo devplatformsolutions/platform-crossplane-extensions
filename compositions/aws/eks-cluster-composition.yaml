@@ -222,7 +222,37 @@ spec:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.clusterVersion
           toFieldPath: spec.forProvider.version
-          
+
+    # Node Group Role
+    - name: eksnodegrouprole
+      base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: Role
+        metadata:
+          name: eks-node-group-role
+          namespace: crossplane-system
+        spec:
+          forProvider:
+            assumeRolePolicy: |
+              {
+                "Version": "2012-10-17",
+                "Statement": [{
+                  "Effect": "Allow",
+                  "Principal": {"Service": "ec2.amazonaws.com"},
+                  "Action": "sts:AssumeRole"
+                }]
+              }
+          providerConfigRef:
+            name: default
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: metadata.name
+          transforms:
+            - type: string
+              string:
+                fmt: "eks-node-role-%s"
+
     # Node Group Policy Attachments
     - name: node-worker-policy
       base:

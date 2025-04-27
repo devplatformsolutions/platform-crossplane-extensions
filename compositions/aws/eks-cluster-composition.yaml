@@ -132,6 +132,7 @@ spec:
           namespace: crossplane-system
         spec:
           forProvider:
+            region: us-west-2
             vpcIdSelector:
               matchControllerRef: true
           providerConfigRef:
@@ -147,9 +148,10 @@ spec:
           namespace: crossplane-system
         spec:
           forProvider:
+            region: us-west-2
+            destinationCidrBlock: 0.0.0.0/0
             routeTableIdSelector:
               matchControllerRef: true
-            destinationCidrBlock: 0.0.0.0/0
             gatewayIdSelector:
               matchControllerRef: true
           providerConfigRef:
@@ -165,6 +167,7 @@ spec:
           namespace: crossplane-system
         spec:
           forProvider:
+            region: us-west-2
             routeTableIdSelector:
               matchControllerRef: true
             vpcIdSelector:

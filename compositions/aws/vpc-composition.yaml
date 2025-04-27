@@ -160,8 +160,8 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            domain: vpc
-            vpc: false
+            domain: 'vpc'
+            # vpc: false
           managementPolicies: 
             - "*"
 

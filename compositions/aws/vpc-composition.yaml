@@ -250,8 +250,7 @@ spec:
           forProvider:
             region: us-east-1
             vpcIdSelector:
-              matchLabels:
-                gateway-type: internet
+              matchControllerRef: true
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -347,8 +346,7 @@ spec:
           forProvider:
             region: us-east-1
             vpcIdSelector:
-              matchLabels:
-                gateway-type: nat
+              matchControllerRef: true
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region

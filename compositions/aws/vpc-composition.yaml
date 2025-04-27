@@ -73,7 +73,7 @@ spec:
               # matchControllerRef: true
               matchLabels:
                 subnet-type: private
-            allocationSelector:
+            allocationIdSelector:
               # matchControllerRef: true
               matchLabels:
                 eip-type: nat

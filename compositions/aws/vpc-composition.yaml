@@ -161,6 +161,9 @@ spec:
           forProvider:
             region: us-east-1
             domain: vpc
+            vpc: false
+          managementPolicies: 
+            - "*"
 
     # Public Route Table
     - name: public-route-table

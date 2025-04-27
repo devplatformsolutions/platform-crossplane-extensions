@@ -15,9 +15,6 @@ spec:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: VPC
         metadata:
-          name: my-vpc
-          annotations:
-            crossplane.io/external-name: my-vpc
           labels:
             provider: aws
         spec:

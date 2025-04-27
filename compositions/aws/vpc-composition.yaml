@@ -151,7 +151,7 @@ spec:
 
     - name: nat-eip
       base:
-        apiVersion: ec2.aws.upbound.io/v1beta2
+        apiVersion: ec2.aws.upbound.io/v1beta1
         kind: EIP
         metadata:
           name: nat-eip

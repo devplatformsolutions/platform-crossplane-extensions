@@ -39,8 +39,8 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            vpcIdRef:
-              name: vpc
+            vpcIdSelector:
+              matchControllerRef: true
           tags:
             - key: Name
               value: my-igw
@@ -57,9 +57,9 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            vpcIdRef:
-              name: vpc
             cidrBlock: 10.0.1.0/24
+            vpcIdSelector:
+              matchControllerRef: true
             availabilityZone: us-east-1a
             mapPublicIpOnLaunch: true
           tags:
@@ -77,28 +77,14 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            vpcIdRef:
-              name: vpc
+            vpcIdSelector:
+              matchControllerRef: true
             cidrBlock: 10.0.2.0/24
             availabilityZone: us-east-1b
             mapPublicIpOnLaunch: true
           tags:
             - key: Name
               value: public-2
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
-          toFieldPath: spec.forProvider.region
-
-    # Elastic IP for NAT Gateway
-    - name: nat-eip
-      base:
-        apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: EIP
-        spec:
-          forProvider:
-            region: us-east-1
-            vpc: true
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -111,11 +97,10 @@ spec:
         kind: NatGateway
         spec:
           forProvider:
+            connectivityType: private
             region: us-east-1
-            allocationIdRef:
-              name: nat-eip
-            subnetIdRef:
-              name: public-subnet-1
+            subnetIdSelector:
+              matchControllerRef: true
           tags:
             - key: Name
               value: main-nat
@@ -132,8 +117,8 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            vpcIdRef:
-              name: vpc
+            vpcIdSelector:
+              matchControllerRef: true
             routes:
               - cidrBlock: 0.0.0.0/0
                 gatewayIdRef:
@@ -154,10 +139,10 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            subnetIdRef:
-              name: public-subnet-1
-            routeTableIdRef:
-              name: public-route-table
+            subnetIdSelector:
+              matchControllerRef: true
+            routeTableIdSelector:
+              matchControllerRef: true
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -170,10 +155,10 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            subnetIdRef:
-              name: public-subnet-2
-            routeTableIdRef:
-              name: public-route-table
+            subnetIdSelector:
+              matchControllerRef: true
+            routeTableIdSelector:
+              matchControllerRef: true
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -187,8 +172,8 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            vpcIdRef:
-              name: vpc
+            vpcIdSelector:
+              matchControllerRef: true
             cidrBlock: 10.0.10.0/24
             availabilityZone: us-east-1a
             mapPublicIpOnLaunch: false
@@ -207,8 +192,8 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            vpcIdRef:
-              name: vpc
+            vpcIdSelector:
+              matchControllerRef: true
             cidrBlock: 10.0.11.0/24
             availabilityZone: us-east-1b
             mapPublicIpOnLaunch: false
@@ -227,8 +212,8 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            vpcIdRef:
-              name: vpc
+            vpcIdSelector:
+              matchControllerRef: true
             cidrBlock: 10.0.12.0/24
             availabilityZone: us-east-1c
             mapPublicIpOnLaunch: false
@@ -248,12 +233,12 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            vpcIdRef:
-              name: vpc
+            vpcIdSelector:
+              matchControllerRef: true
             routes:
               - cidrBlock: 0.0.0.0/0
-                natGatewayIdRef:
-                  name: nat-gateway
+                natGatewayIdSelector:
+                  matchControllerRef: true
           tags:
             - key: Name
               value: private-rt
@@ -270,10 +255,10 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            subnetIdRef:
-              name: private-subnet-1
-            routeTableIdRef:
-              name: private-route-table
+            subnetIdSelector:
+              matchControllerRef: true
+            routeTableIdSelector:
+              matchControllerRef: true
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -286,10 +271,10 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            subnetIdRef:
-              name: private-subnet-2
-            routeTableIdRef:
-              name: private-route-table
+            subnetIdSelector:
+              matchControllerRef: true
+            routeTableIdSelector:
+              matchControllerRef: true 
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -302,10 +287,10 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            subnetIdRef:
-              name: private-subnet-3
-            routeTableIdRef:
-              name: private-route-table
+            subnetIdSelector:
+              matchControllerRef: true
+            routeTableIdSelector:
+              matchControllerRef: true
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region

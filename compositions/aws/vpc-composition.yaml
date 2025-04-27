@@ -63,7 +63,7 @@ spec:
             gateway-type: nat
         spec:
           forProvider:
-            connectivityType: private
+            # connectivityType: private
             region: us-east-1
             subnetIdSelector:
               # matchControllerRef: true

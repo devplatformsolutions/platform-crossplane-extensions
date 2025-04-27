@@ -26,13 +26,35 @@ spec:
                   properties:
                     clusterVersion:
                       type: string
+                      default: "1.28"
                     region:
                       type: string
+                      default: "us-west-2"
                     nodeSize:
                       type: string
+                      enum: ["small", "medium", "large"]
+                      default: "medium"
                     nodeCount:
                       type: integer
+                      minimum: 1
+                      maximum: 10
+                      default: 2
+                    minNodeCount:
+                      type: integer
+                      minimum: 1
+                      maximum: 10
+                      default: 1
                   required:
                     - region
+                    - clusterVersion
               required:
                 - parameters
+            status:
+              type: object
+              properties:
+                clusterName:
+                  type: string
+                controlPlaneStatus:
+                  type: string
+                nodePoolStatus:
+                  type: string

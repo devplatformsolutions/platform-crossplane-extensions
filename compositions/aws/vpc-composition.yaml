@@ -142,7 +142,7 @@ spec:
             region: us-east-1
             subnetIdSelector:
               matchControllerRef: true
-            allocateIdSelector:
+            allocationSelector:
               matchControllerRef: true
       patches:
         - type: FromCompositeFieldPath

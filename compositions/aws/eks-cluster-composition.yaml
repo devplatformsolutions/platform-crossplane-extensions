@@ -22,8 +22,6 @@ spec:
             cidrBlock: 10.0.0.0/16
             enableDnsSupport: true
             enableDnsHostnames: true
-            tags:
-              Name: eks-vpc
           providerConfigRef:
             name: default
       patches:
@@ -33,7 +31,7 @@ spec:
           transforms:
             - type: string
               string:
-                fmt: "eks-vpc-%s"
+                fmt: "%s-vpc"
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
@@ -53,13 +51,13 @@ spec:
           providerConfigRef:
             name: default
 
-    # Public Subnet 1
-    - name: publicsubnet1
+    # Subnets (3 AZs)
+    - name: subnet-az1
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: Subnet
         metadata:
-          name: eks-public-1
+          name: eks-subnet-az1
           namespace: crossplane-system
         spec:
           forProvider:
@@ -67,7 +65,6 @@ spec:
             mapPublicIpOnLaunch: true
             availabilityZone: "us-west-2a"
             tags:
-              Name: eks-public-1
               "kubernetes.io/role/elb": "1"
             vpcIdSelector:
               matchControllerRef: true
@@ -78,13 +75,12 @@ spec:
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
 
-    # Public Subnet 2
-    - name: publicsubnet2
+    - name: subnet-az2
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: Subnet
         metadata:
-          name: eks-public-2
+          name: eks-subnet-az2
           namespace: crossplane-system
         spec:
           forProvider:
@@ -92,7 +88,6 @@ spec:
             mapPublicIpOnLaunch: true
             availabilityZone: "us-west-2b"
             tags:
-              Name: eks-public-2
               "kubernetes.io/role/elb": "1"
             vpcIdSelector:
               matchControllerRef: true
@@ -103,34 +98,107 @@ spec:
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
 
-    # - name: eks-cluster-sg
-    #   base:
-    #     apiVersion: ec2.aws.upbound.io/v1beta1
-    #     kind: SecurityGroup
-    #     metadata:
-    #       name: eks-cluster-sg
-    #       namespace: crossplane-system
-    #     spec:
-    #       forProvider:
-    #         region: us-west-2
-    #         vpcIdSelector:
-    #           matchControllerRef: true
-    #         ingress:
-    #           - fromPort: 443
-    #             toPort: 443
-    #             protocol: tcp
-    #             cidrBlocks: ["0.0.0.0/0"]
-    #           - fromPort: 9443
-    #             toPort: 9443
-    #             protocol: tcp
-    #             cidrBlocks: ["0.0.0.0/0"]
-    #         egress:
-    #           - fromPort: 0
-    #             toPort: 0
-    #             protocol: "-1"
-    #             cidrBlocks: ["0.0.0.0/0"]
-    #       providerConfigRef:
-    #         name: default
+    - name: subnet-az3
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: Subnet
+        metadata:
+          name: eks-subnet-az3
+          namespace: crossplane-system
+        spec:
+          forProvider:
+            cidrBlock: 10.0.3.0/24
+            mapPublicIpOnLaunch: true
+            availabilityZone: "us-west-2c"
+            tags:
+              "kubernetes.io/role/elb": "1"
+            vpcIdSelector:
+              matchControllerRef: true
+          providerConfigRef:
+            name: default
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.region
+          toFieldPath: spec.forProvider.region
+
+    # Route Table
+    - name: routetable
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: RouteTable
+        metadata:
+          name: eks-route-table
+          namespace: crossplane-system
+        spec:
+          forProvider:
+            vpcIdSelector:
+              matchControllerRef: true
+          providerConfigRef:
+            name: default
+
+    # Route
+    - name: route
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: Route
+        metadata:
+          name: eks-route
+          namespace: crossplane-system
+        spec:
+          forProvider:
+            routeTableIdSelector:
+              matchControllerRef: true
+            destinationCidrBlock: 0.0.0.0/0
+            gatewayIdSelector:
+              matchControllerRef: true
+          providerConfigRef:
+            name: default
+
+    # Main Route Table Association
+    - name: mainroutetable
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: MainRouteTableAssociation
+        metadata:
+          name: eks-main-route-table
+          namespace: crossplane-system
+        spec:
+          forProvider:
+            routeTableIdSelector:
+              matchControllerRef: true
+            vpcIdSelector:
+              matchControllerRef: true
+          providerConfigRef:
+            name: default
+
+    # Security Group
+    - name: clustersg
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: SecurityGroup
+        metadata:
+          name: eks-cluster-sg
+          namespace: crossplane-system
+        spec:
+          forProvider:
+            vpcIdSelector:
+              matchControllerRef: true
+            ingress:
+              - fromPort: 443
+                toPort: 443
+                protocol: tcp
+                cidrBlocks: ["0.0.0.0/0"]
+            egress:
+              - fromPort: 0
+                toPort: 0
+                protocol: "-1"
+                cidrBlocks: ["0.0.0.0/0"]
+          providerConfigRef:
+            name: default
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.region
+          toFieldPath: spec.forProvider.region
 
     # EKS Cluster Role
     - name: eksclusterrole
@@ -160,7 +228,7 @@ spec:
           transforms:
             - type: string
               string:
-                fmt: "eks-cluster-role-%s"
+                fmt: "%s-cluster-role"
 
     # Cluster Policy Attachments
     - name: eks-cluster-policy
@@ -207,12 +275,12 @@ spec:
               matchControllerRef: true
             version: "1.28"
             vpcConfig:
-              endpointPrivateAccess: true
-              endpointPublicAccess: true
-              subnetIdSelector:
-                matchControllerRef: true
-              # securityGroupIdSelector:
-              #   matchControllerRef: true
+              - endpointPrivateAccess: true
+                endpointPublicAccess: true
+                subnetIdSelector:
+                  matchControllerRef: true
+                securityGroupIdSelector:
+                  matchControllerRef: true
           providerConfigRef:
             name: default
       patches:
@@ -222,6 +290,24 @@ spec:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.clusterVersion
           toFieldPath: spec.forProvider.version
+
+    # Cluster Auth
+    - name: clusterauth
+      base:
+        apiVersion: eks.aws.upbound.io/v1beta1
+        kind: ClusterAuth
+        metadata:
+          name: eks-cluster-auth
+          namespace: crossplane-system
+        spec:
+          forProvider:
+            clusterNameSelector:
+              matchControllerRef: true
+          writeConnectionSecretToRef:
+            name: eks-cluster-auth
+            namespace: crossplane-system
+          providerConfigRef:
+            name: default
 
     # Node Group Role
     - name: eksnodegrouprole
@@ -251,9 +337,9 @@ spec:
           transforms:
             - type: string
               string:
-                fmt: "eks-node-role-%s"
+                fmt: "%s-node-role"
 
-    # Node Group Policy Attachments
+    # Node Group Policies
     - name: node-worker-policy
       base:
         apiVersion: iam.aws.upbound.io/v1beta1
@@ -264,19 +350,11 @@ spec:
         spec:
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-            roleRef:
-              name: "eks-node-role"  # Will be overwritten by the patch below
+            roleSelector:
+              matchControllerRef: true
           providerConfigRef:
             name: default
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: metadata.name
-          toFieldPath: spec.forProvider.roleRef.name
-          transforms:
-            - type: string
-              string:
-                fmt: "eks-node-role-%s"
-    
+
     - name: node-cni-policy
       base:
         apiVersion: iam.aws.upbound.io/v1beta1
@@ -287,19 +365,11 @@ spec:
         spec:
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-            roleRef:
-              name: "eks-node-role"  # Will be overwritten by the patch below
+            roleSelector:
+              matchControllerRef: true
           providerConfigRef:
             name: default
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: metadata.name
-          toFieldPath: spec.forProvider.roleRef.name
-          transforms:
-            - type: string
-              string:
-                fmt: "eks-node-role-%s"
-    
+
     - name: node-ecr-policy
       base:
         apiVersion: iam.aws.upbound.io/v1beta1
@@ -310,18 +380,25 @@ spec:
         spec:
           forProvider:
             policyArn: "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-            roleRef:
-              name: "eks-node-role"  # Will be overwritten by the patch below
+            roleSelector:
+              matchControllerRef: true
           providerConfigRef:
             name: default
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: metadata.name
-          toFieldPath: spec.forProvider.roleRef.name
-          transforms:
-            - type: string
-              string:
-                fmt: "eks-node-role-%s"
+
+    - name: vpc-resource-controller
+      base:
+        apiVersion: iam.aws.upbound.io/v1beta1
+        kind: RolePolicyAttachment
+        metadata:
+          name: vpc-resource-controller
+          namespace: crossplane-system
+        spec:
+          forProvider:
+            policyArn: "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
+            roleSelector:
+              matchControllerRef: true
+          providerConfigRef:
+            name: default
 
     # EKS Node Group
     - name: eksnodegroup
@@ -337,14 +414,15 @@ spec:
               matchControllerRef: true
             nodeRoleArnSelector:
               matchControllerRef: true
-            subnetRefs:
-              - name: publicsubnet1
-              - name: publicsubnet2
+            subnetIdSelector:
+              matchControllerRef: true
             scalingConfig:
               - desiredSize: 2
                 maxSize: 4
                 minSize: 1
             instanceTypes: ["t3.medium"]
+            tags:
+              Name: eks-node-group
           providerConfigRef:
             name: default
       patches:
@@ -357,3 +435,23 @@ spec:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.nodeSize
           toFieldPath: spec.forProvider.instanceTypes[0]
+
+    # EBS CSI Addon
+    - name: ebsaddon
+      base:
+        apiVersion: eks.aws.upbound.io/v1beta1
+        kind: Addon
+        metadata:
+          name: ebs-csi-driver
+          namespace: crossplane-system
+        spec:
+          forProvider:
+            addonName: aws-ebs-csi-driver
+            clusterNameSelector:
+              matchControllerRef: true
+          providerConfigRef:
+            name: default
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.region
+          toFieldPath: spec.forProvider.region

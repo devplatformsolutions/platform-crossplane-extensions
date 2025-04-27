@@ -257,7 +257,30 @@ spec:
           toFieldPath: spec.forProvider.region
 
     # Public Route Table Associations
-    - name: public-subnet-1-association
+    - name: public-subnet-1-association-a
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: RouteTableAssociation
+        metadata:
+          name: public-subnet-1-association
+          labels:
+            provider: aws
+        spec:
+          forProvider:
+            region: us-east-1
+            routeTableIdSelector:
+              # matchControllerRef: true
+              matchLabels:
+                table-type: public
+            gatewayIdSelector:
+              matchLabels:
+                gateway-type: internet
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.region
+          toFieldPath: spec.forProvider.region
+
+    - name: public-subnet-1-association-b
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: RouteTableAssociation
@@ -276,9 +299,6 @@ spec:
               # matchControllerRef: true
               matchLabels:
                 table-type: public
-            gatewayIdSelector:
-              matchLabels:
-                gateway-type: internet
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -353,7 +373,30 @@ spec:
           toFieldPath: spec.forProvider.region
 
     # Private Route Table Associations
-    - name: private-subnet-1-association
+    - name: private-subnet-1-association-a
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: RouteTableAssociation
+        metadata:
+          name: private-subnet-1-association
+          labels:
+            provider: aws
+        spec:
+          forProvider:
+            region: us-east-1
+            routeTableIdSelector:
+              # matchControllerRef: true
+              matchLabels:
+                table-type: private
+            gatewayIdSelector:
+              matchLabels:
+                gateway-type: nat
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.region
+          toFieldPath: spec.forProvider.region
+
+    - name: private-subnet-1-association-b
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: RouteTableAssociation
@@ -372,14 +415,10 @@ spec:
               # matchControllerRef: true
               matchLabels:
                 table-type: private
-            gatewayIdSelector:
-              matchLabels:
-                gateway-type: nat
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
-
     # - name: private-subnet-2-association
     #   base:
     #     apiVersion: ec2.aws.upbound.io/v1beta1

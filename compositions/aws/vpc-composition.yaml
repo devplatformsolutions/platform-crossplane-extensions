@@ -161,8 +161,8 @@ spec:
           forProvider:
             region: us-east-1
             domain: 'vpc'
-            publicIpv4Pool: amazon
-            # vpc: false
+            publicIpv4Pool: identifier
+            vpc: false
           managementPolicies: 
             - "*"
 

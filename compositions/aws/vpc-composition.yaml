@@ -155,8 +155,8 @@ spec:
         kind: EIP
         metadata:
           name: nat-eip
-          annotations:
-            crossplane.io/external-name: nat-eip
+          # annotations:
+          #   crossplane.io/external-name: nat-eip
         spec:
           forProvider:
             region: us-east-1

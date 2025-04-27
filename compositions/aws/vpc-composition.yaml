@@ -250,12 +250,8 @@ spec:
           forProvider:
             region: us-east-1
             vpcIdSelector:
-              matchControllerRef: true
-            routes:
-              - cidrBlock: 0.0.0.0/0
-                gatewayIdSelector:
-                  matchLabels:
-                    gateway-type: internet
+              matchLabels:
+                gateway-type: internet
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -281,6 +277,9 @@ spec:
               # matchControllerRef: true
               matchLabels:
                 table-type: public
+            gatewayIdSelector:
+              matchLabels:
+                gateway-type: internet
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -334,7 +333,6 @@ spec:
     #       fromFieldPath: spec.parameters.region
     #       toFieldPath: spec.forProvider.region
 
-
     # Private Route Table
     - name: private-route-table
       base:
@@ -349,12 +347,8 @@ spec:
           forProvider:
             region: us-east-1
             vpcIdSelector:
-              matchControllerRef: true
-            routes:
-              - cidrBlock: 0.0.0.0/0
-                natGatewayIdSelector:
-                  matchLabels:
-                    gateway-type: nat
+              matchLabels:
+                gateway-type: nat
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -380,6 +374,9 @@ spec:
               # matchControllerRef: true
               matchLabels:
                 table-type: private
+            gatewayIdSelector:
+              matchLabels:
+                gateway-type: nat
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region

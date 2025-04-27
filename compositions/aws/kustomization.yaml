@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
 - ec2-dynamodb-comp.yaml
 - eks-cluster-composition.yaml
+- vpc-composition.yaml
 # Add any other Composition files in this directory

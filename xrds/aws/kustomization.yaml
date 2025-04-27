@@ -4,4 +4,5 @@ kind: Kustomization
 resources:
 - ec2-dynamodb-xrd.yaml
 - eks-cluster-xrd.yaml
+- vpc-xrd.yaml
 # Add any other XRD files in this directory

@@ -46,6 +46,7 @@ spec:
           namespace: crossplane-system
         spec:
           forProvider:
+            region: us-west-2
             vpcIdSelector:
               matchControllerRef: true
           providerConfigRef:

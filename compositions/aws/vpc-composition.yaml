@@ -144,7 +144,7 @@ spec:
     - name: nat-gateway
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: NatGateway
+        kind: NATGateway
         metadata:
           name: main-nat
           annotations:

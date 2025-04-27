@@ -63,6 +63,7 @@ spec:
             crossplane.io/external-name: public-subnet-1
           labels:
             provider: aws
+            subnet-type: public
         spec:
           forProvider:
             region: us-east-1
@@ -86,6 +87,7 @@ spec:
             crossplane.io/external-name: public-subnet-2
           labels:
             provider: aws
+            subnet-type: public
         spec:
           forProvider:
             region: us-east-1
@@ -109,6 +111,7 @@ spec:
             crossplane.io/external-name: public-subnet-3
           labels:
             provider: aws
+            subnet-type: public
         spec:
           forProvider:
             region: us-east-1
@@ -155,6 +158,7 @@ spec:
             crossplane.io/external-name: public-rt
           labels:
             provider: aws
+            table-type: public
         spec:
           forProvider:
             region: us-east-1
@@ -185,8 +189,12 @@ spec:
             region: us-east-1
             subnetIdSelector:
               matchControllerRef: true
+              matchLabels:
+                subnet-type: public
             routeTableIdSelector:
               matchControllerRef: true
+              matchLabels:
+                table-type: public
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -207,13 +215,42 @@ spec:
             region: us-east-1
             subnetIdSelector:
               matchControllerRef: true
+              matchLabels:
+                subnet-type: public
             routeTableIdSelector:
               matchControllerRef: true
+              matchLabels:
+                table-type: public
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
           toFieldPath: spec.forProvider.region
 
+    - name: public-subnet-3-association
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: RouteTableAssociation
+        metadata:
+          name: public-subnet-3-association
+          annotations:
+            crossplane.io/external-name: public-subnet-3-association
+          labels:
+            provider: aws
+        spec:
+          forProvider:
+            region: us-east-1
+            subnetIdSelector:
+              matchControllerRef: true
+              matchLabels:
+                subnet-type: public
+            routeTableIdSelector:
+              matchControllerRef: true
+              matchLabels:
+                table-type: public
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.region
+          toFieldPath: spec.forProvider.region
     # Private Subnets
     - name: private-subnet-1
       base:
@@ -225,6 +262,7 @@ spec:
             crossplane.io/external-name: private-subnet-1
           labels:
             provider: aws
+            subnet-type: private
         spec:
           forProvider:
             region: us-east-1
@@ -248,6 +286,7 @@ spec:
             crossplane.io/external-name: private-subnet-2
           labels:
             provider: aws
+            subnet-type: private
         spec:
           forProvider:
             region: us-east-1
@@ -271,6 +310,7 @@ spec:
             crossplane.io/external-name: private-subnet-3
           labels:
             provider: aws
+            subnet-type: private
         spec:
           forProvider:
             region: us-east-1
@@ -295,6 +335,7 @@ spec:
             crossplane.io/external-name: private-rt
           labels:
             provider: aws
+            table-type: private
         spec:
           forProvider:
             region: us-east-1
@@ -325,8 +366,12 @@ spec:
             region: us-east-1
             subnetIdSelector:
               matchControllerRef: true
+              matchLabels:
+                subnet-type: private
             routeTableIdSelector:
               matchControllerRef: true
+              matchLabels:
+                table-type: private
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -347,8 +392,12 @@ spec:
             region: us-east-1
             subnetIdSelector:
               matchControllerRef: true
+              matchLabels:
+                subnet-type: private
             routeTableIdSelector:
-              matchControllerRef: true 
+              matchControllerRef: true
+              matchLabels:
+                table-type: private
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region
@@ -369,8 +418,12 @@ spec:
             region: us-east-1
             subnetIdSelector:
               matchControllerRef: true
+              matchLabels:
+                subnet-type: private
             routeTableIdSelector:
               matchControllerRef: true
+              matchLabels:
+                table-type: private
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.region

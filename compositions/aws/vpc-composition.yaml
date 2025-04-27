@@ -38,8 +38,6 @@ spec:
         kind: InternetGateway
         metadata:
           name: my-igw
-          annotations:
-            crossplane.io/external-name: my-igw
           labels:
             provider: aws
             gateway-type: internet
@@ -60,8 +58,6 @@ spec:
         kind: NATGateway
         metadata:
           name: main-nat
-          annotations:
-            crossplane.io/external-name: main-nat
           labels:
             provider: aws
             gateway-type: nat
@@ -91,8 +87,6 @@ spec:
           labels:
             provider: aws
             eip-type: nat
-          # annotations:
-          #   crossplane.io/external-name: nat-eip
         spec:
           forProvider:
             region: us-east-1
@@ -109,8 +103,6 @@ spec:
         kind: Subnet
         metadata:
           name: public-subnet-1
-          annotations:
-            crossplane.io/external-name: public-subnet-1
           labels:
             provider: aws
             subnet-type: public
@@ -134,8 +126,6 @@ spec:
         kind: Subnet
         metadata:
           name: public-subnet-2
-          annotations:
-            crossplane.io/external-name: public-subnet-2
           labels:
             provider: aws
             subnet-type: public
@@ -159,8 +149,6 @@ spec:
         kind: Subnet
         metadata:
           name: public-subnet-3
-          annotations:
-            crossplane.io/external-name: public-subnet-3
           labels:
             provider: aws
             subnet-type: public
@@ -185,8 +173,6 @@ spec:
         kind: Subnet
         metadata:
           name: private-subnet-1
-          annotations:
-            crossplane.io/external-name: private-subnet-1
           labels:
             provider: aws
             subnet-type: private
@@ -210,8 +196,6 @@ spec:
         kind: Subnet
         metadata:
           name: private-subnet-2
-          annotations:
-            crossplane.io/external-name: private-subnet-2
           labels:
             provider: aws
             subnet-type: private
@@ -235,8 +219,6 @@ spec:
         kind: Subnet
         metadata:
           name: private-subnet-3
-          annotations:
-            crossplane.io/external-name: private-subnet-3
           labels:
             provider: aws
             subnet-type: private
@@ -261,8 +243,6 @@ spec:
         kind: RouteTable
         metadata:
           name: public-rt
-          annotations:
-            crossplane.io/external-name: public-rt
           labels:
             provider: aws
             table-type: public
@@ -288,8 +268,6 @@ spec:
         kind: RouteTableAssociation
         metadata:
           name: public-subnet-1-association
-          annotations:
-            crossplane.io/external-name: public-subnet-1-association
           labels:
             provider: aws
         spec:
@@ -314,8 +292,6 @@ spec:
     #     kind: RouteTableAssociation
     #     metadata:
     #       name: public-subnet-2-association
-    #       annotations:
-    #         crossplane.io/external-name: public-subnet-2-association
     #       labels:
     #         provider: aws
     #     spec:
@@ -340,8 +316,6 @@ spec:
     #     kind: RouteTableAssociation
     #     metadata:
     #       name: public-subnet-3-association
-    #       annotations:
-    #         crossplane.io/external-name: public-subnet-3-association
     #       labels:
     #         provider: aws
     #     spec:
@@ -368,8 +342,6 @@ spec:
         kind: RouteTable
         metadata:
           name: private-rt
-          annotations:
-            crossplane.io/external-name: private-rt
           labels:
             provider: aws
             table-type: private
@@ -395,8 +367,6 @@ spec:
         kind: RouteTableAssociation
         metadata:
           name: private-subnet-1-association
-          annotations:
-            crossplane.io/external-name: private-subnet-1-association
           labels:
             provider: aws
         spec:
@@ -421,8 +391,6 @@ spec:
     #     kind: RouteTableAssociation
     #     metadata:
     #       name: private-subnet-2-association
-    #       annotations:
-    #         crossplane.io/external-name: private-subnet-2-association
     #       labels:
     #         provider: aws
     #     spec:
@@ -447,8 +415,6 @@ spec:
     #     kind: RouteTableAssociation
     #     metadata:
     #       name: private-subnet-3-association
-    #       annotations:
-    #         crossplane.io/external-name: private-subnet-3-association
     #       labels:
     #         provider: aws
     #     spec:

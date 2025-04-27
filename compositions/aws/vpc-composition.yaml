@@ -160,7 +160,7 @@ spec:
         spec:
           forProvider:
             region: us-east-1
-            vpc: true  # Required for VPC-bound EIPs
+            domain: vpc
 
     # Public Route Table
     - name: public-route-table

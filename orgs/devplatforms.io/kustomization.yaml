@@ -33,3 +33,15 @@ patches:
     kind: Composition
     name: eks.aws.platform.example.org
     version: v1
+- path: patches/vpc-xrd-variables.yaml
+  target:
+    group: apiextensions.crossplane.io
+    kind: CompositeResourceDefinition
+    name: xvpcs.aws.platform.example.org
+    version: v1
+- path: patches/vpc-composition-variables.yaml
+  target:
+    group: apiextensions.crossplane.io
+    kind: Composition
+    name: vpc.aws.platform.example.org
+    version: v1

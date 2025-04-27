@@ -21,15 +21,18 @@ spec:
             spec:
               type: object
               properties:
-                parameters:
-                  type: object
-                  properties:
-                    region:
-                      type: string
-                      default: us-east-1
-                    cidrBlock:
-                      type: string
-                      default: 10.0.0.0/16
-                  required:
-                    - region
-                    - cidrBlock
+                region:
+                  type: string
+                  default: eu-north-1
+                cidrBlock:
+                  type: string
+                  default: 10.0.0.0/16
+                availabilityZones:
+                  type: array
+                  items:
+                    type: string
+                  default: ["eu-north-1a", "eu-north-1b"]
+              required:
+                - region
+                - cidrBlock
+                - availabilityZones

@@ -16,282 +16,167 @@ spec:
         kind: VPC
         spec:
           forProvider:
-            region: us-east-1
+            region: eu-north-1
             cidrBlock: 10.0.0.0/16
-            enableDnsSupport: true
             enableDnsHostnames: true
-          tags:
-            - key: Name
-              value: my-vpc
+            enableDnsSupport: true
+            tags:
+              - key: Name
+                value: EksClusterStack/EksCluster/DefaultVpc
       patches:
         - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.cidrBlock
-          toFieldPath: spec.forProvider.cidrBlock
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
+          fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.cidrBlock
+          toFieldPath: spec.forProvider.cidrBlock
 
     # Internet Gateway
-    - name: internet-gateway
+    - name: igw
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: InternetGateway
         spec:
           forProvider:
-            region: us-east-1
-            vpcIdSelector:
-              matchControllerRef: true
-          tags:
-            - key: Name
-              value: my-igw
+            region: eu-north-1
+            tags:
+              - key: Name
+                value: EksClusterStack/EksCluster/DefaultVpc
+            vpcIdRef:
+              name: vpc
+      dependsOn:
+        - vpc
       patches:
         - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
+          fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
 
-    # Public Subnets
+    # Public Subnet 1
     - name: public-subnet-1
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: Subnet
         spec:
           forProvider:
-            region: us-east-1
-            cidrBlock: 10.0.1.0/24
-            vpcIdSelector:
-              matchControllerRef: true
-            availabilityZone: us-east-1a
+            region: eu-north-1
+            availabilityZone: eu-north-1a
+            cidrBlock: 10.0.0.0/19
             mapPublicIpOnLaunch: true
-          tags:
-            - key: Name
-              value: public-1
+            vpcIdRef:
+              name: vpc
+            tags:
+              - key: Name
+                value: PublicSubnet
+              - key: kubernetes.io/cluster/EksCluster
+                value: shared
+      dependsOn:
+        - vpc
       patches:
         - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
+          fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
 
-    - name: public-subnet-2
+    # Public Route Table 1
+    - name: public-route-table-1
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: Subnet
+        kind: RouteTable
         spec:
           forProvider:
-            region: us-east-1
-            vpcIdSelector:
-              matchControllerRef: true
-            cidrBlock: 10.0.2.0/24
-            availabilityZone: us-east-1b
-            mapPublicIpOnLaunch: true
-          tags:
-            - key: Name
-              value: public-2
+            region: eu-north-1
+            vpcIdRef:
+              name: vpc
+            routes:
+              - cidrBlock: 0.0.0.0/0
+                gatewayIdRef:
+                  name: igw
+            tags:
+              - key: Name
+                value: PublicSubnet
+      dependsOn:
+        - igw
       patches:
         - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
+          fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
 
-    # NAT Gateway
+    # NAT Gateway Resources
+    - name: nat-eip
+      base:
+        apiVersion: ec2.aws.upbound.io/v1beta1
+        kind: EIP
+        spec:
+          forProvider:
+            region: eu-north-1
+            domain: vpc
+      dependsOn:
+        - vpc
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region
+
     - name: nat-gateway
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: NatGateway
         spec:
           forProvider:
-            connectivityType: private
-            region: us-east-1
-            subnetIdSelector:
-              matchControllerRef: true
-          tags:
-            - key: Name
-              value: main-nat
+            region: eu-north-1
+            allocationIdRef:
+              name: nat-eip
+            subnetIdRef:
+              name: public-subnet-1
+      dependsOn:
+        - nat-eip
+        - public-subnet-1
       patches:
         - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
+          fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
 
-    # Public Route Table
-    - name: public-route-table
-      base:
-        apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: RouteTable
-        spec:
-          forProvider:
-            region: us-east-1
-            vpcIdSelector:
-              matchControllerRef: true
-            routes:
-              - cidrBlock: 0.0.0.0/0
-                gatewayIdRef:
-                  name: internet-gateway
-          tags:
-            - key: Name
-              value: public-rt
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
-          toFieldPath: spec.forProvider.region
-
-    # Public Route Table Associations
-    - name: public-subnet-1-association
-      base:
-        apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: RouteTableAssociation
-        spec:
-          forProvider:
-            region: us-east-1
-            subnetIdSelector:
-              matchControllerRef: true
-            routeTableIdSelector:
-              matchControllerRef: true
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
-          toFieldPath: spec.forProvider.region
-
-    - name: public-subnet-2-association
-      base:
-        apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: RouteTableAssociation
-        spec:
-          forProvider:
-            region: us-east-1
-            subnetIdSelector:
-              matchControllerRef: true
-            routeTableIdSelector:
-              matchControllerRef: true
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
-          toFieldPath: spec.forProvider.region
-
-    # Private Subnets
+    # Private Subnet 1
     - name: private-subnet-1
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: Subnet
         spec:
           forProvider:
-            region: us-east-1
-            vpcIdSelector:
-              matchControllerRef: true
-            cidrBlock: 10.0.10.0/24
-            availabilityZone: us-east-1a
-            mapPublicIpOnLaunch: false
-          tags:
-            - key: Name
-              value: private-1
+            region: eu-north-1
+            availabilityZone: eu-north-1a
+            cidrBlock: 10.0.64.0/19
+            vpcIdRef:
+              name: vpc
+            tags:
+              - key: Name
+                value: PrivateSubnet
+      dependsOn:
+        - vpc
       patches:
         - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
+          fromFieldPath: spec.region
           toFieldPath: spec.forProvider.region
 
-    - name: private-subnet-2
-      base:
-        apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: Subnet
-        spec:
-          forProvider:
-            region: us-east-1
-            vpcIdSelector:
-              matchControllerRef: true
-            cidrBlock: 10.0.11.0/24
-            availabilityZone: us-east-1b
-            mapPublicIpOnLaunch: false
-          tags:
-            - key: Name
-              value: private-2
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
-          toFieldPath: spec.forProvider.region
-
-    - name: private-subnet-3
-      base:
-        apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: Subnet
-        spec:
-          forProvider:
-            region: us-east-1
-            vpcIdSelector:
-              matchControllerRef: true
-            cidrBlock: 10.0.12.0/24
-            availabilityZone: us-east-1c
-            mapPublicIpOnLaunch: false
-          tags:
-            - key: Name
-              value: private-3
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
-          toFieldPath: spec.forProvider.region
-
-    # Private Route Table
-    - name: private-route-table
+    # Private Route Table 1
+    - name: private-route-table-1
       base:
         apiVersion: ec2.aws.upbound.io/v1beta1
         kind: RouteTable
         spec:
           forProvider:
-            region: us-east-1
-            vpcIdSelector:
-              matchControllerRef: true
+            region: eu-north-1
+            vpcIdRef:
+              name: vpc
             routes:
               - cidrBlock: 0.0.0.0/0
-                natGatewayIdSelector:
-                  matchControllerRef: true
-          tags:
-            - key: Name
-              value: private-rt
+                natGatewayIdRef:
+                  name: nat-gateway
+            tags:
+              - key: Name
+                value: PrivateSubnet
+      dependsOn:
+        - nat-gateway
       patches:
         - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
-          toFieldPath: spec.forProvider.region
-
-    # Private Route Table Associations
-    - name: private-subnet-1-association
-      base:
-        apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: RouteTableAssociation
-        spec:
-          forProvider:
-            region: us-east-1
-            subnetIdSelector:
-              matchControllerRef: true
-            routeTableIdSelector:
-              matchControllerRef: true
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
-          toFieldPath: spec.forProvider.region
-
-    - name: private-subnet-2-association
-      base:
-        apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: RouteTableAssociation
-        spec:
-          forProvider:
-            region: us-east-1
-            subnetIdSelector:
-              matchControllerRef: true
-            routeTableIdSelector:
-              matchControllerRef: true 
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
-          toFieldPath: spec.forProvider.region
-
-    - name: private-subnet-3-association
-      base:
-        apiVersion: ec2.aws.upbound.io/v1beta1
-        kind: RouteTableAssociation
-        spec:
-          forProvider:
-            region: us-east-1
-            subnetIdSelector:
-              matchControllerRef: true
-            routeTableIdSelector:
-              matchControllerRef: true
-      patches:
-        - type: FromCompositeFieldPath
-          fromFieldPath: spec.parameters.region
-          toFieldPath: spec.forProvider.region
+          fromFieldPath: spec.region
+          toFieldPath: spec.forProvider.region 

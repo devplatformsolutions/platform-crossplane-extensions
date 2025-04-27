@@ -135,7 +135,7 @@ spec:
             provider: aws
         spec:
           forProvider:
-            connectivityType: private
+            connectivityType: public 
             region: us-east-1
             subnetIdSelector:
               matchControllerRef: true

@@ -63,12 +63,12 @@ spec:
             spec:
               forProvider:
                 region: {{ .observed.composite.resource.spec.parameters.region }}
-                subnetIdSelector:
-                  matchLabels:
-                    subnet-type: private
                 allocationIdSelector:
                   matchLabels:
                     eip-type: nat
+                subnetIdSelector:
+                  matchLabels:
+                    subnet-type: private
 
             ---
             # NAT EIP
@@ -152,6 +152,26 @@ spec:
                   matchControllerRef: true
 
             ---
+            # Public Route to Internet Gateway
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: Route
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: public-route-igw
+              labels:
+                provider: aws
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                routeTableIdSelector:
+                  matchLabels:
+                    table-type: public
+                destinationCidrBlock: 0.0.0.0/0
+                gatewayIdSelector:
+                  matchLabels:
+                    gateway-type: internet
+
+            ---
             # Public Route Table Associations
             {{- range $i, $az := $azs }}
             apiVersion: ec2.aws.upbound.io/v1beta1
@@ -174,25 +194,6 @@ spec:
             {{- end }}
 
             ---
-            # Public Route Table Igw Associations
-            apiVersion: ec2.aws.upbound.io/v1beta1
-            kind: RouteTableAssociation
-            metadata:
-              annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: public-rt-igw-assoc
-              labels:
-                provider: aws
-            spec:
-              forProvider:
-                region: {{ $.observed.composite.resource.spec.parameters.region }}
-                gatewayIdSelector:
-                  matchLabels:
-                    gateway-type: internet
-                routeTableIdSelector:
-                  matchLabels:
-                    table-type: public
-
-            ---
             # Private Route Table
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: RouteTable
@@ -207,6 +208,26 @@ spec:
                 region: {{ .observed.composite.resource.spec.parameters.region }}
                 vpcIdSelector:
                   matchControllerRef: true
+
+            ---
+            # Private Route to NAT Gateway
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: Route
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-route-nat
+              labels:
+                provider: aws
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                routeTableIdSelector:
+                  matchLabels:
+                    table-type: private
+                destinationCidrBlock: 0.0.0.0/0
+                natGatewayIdSelector:
+                  matchLabels:
+                    gateway-type: nat
 
             ---
             # Private Route Table Associations
@@ -229,25 +250,6 @@ spec:
                     table-type: private
             ---
             {{- end }}
-
-            ---
-            # Private Route Table Nat Gateway Associations
-            apiVersion: ec2.aws.upbound.io/v1beta1
-            kind: RouteTableAssociation
-            metadata:
-              annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: private-rt-nat-assoc
-              labels:
-                provider: aws
-            spec:
-              forProvider:
-                region: {{ $.observed.composite.resource.spec.parameters.region }}
-                natGatewayIdSelector:
-                  matchLabels:
-                    gateway-type: nat
-                routeTableIdSelector:
-                  matchLabels:
-                    table-type: private
 
     - step: auto-ready
       functionRef:

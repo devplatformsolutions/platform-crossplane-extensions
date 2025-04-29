@@ -27,12 +27,16 @@ spec:
                 gotemplating.fn.crossplane.io/composition-resource-name: vpc
               labels:
                 provider: aws
+                environment: production
             spec:
               forProvider:
                 region: {{ .observed.composite.resource.spec.parameters.region }}
                 cidrBlock: {{ .observed.composite.resource.spec.parameters.cidrBlock }}
                 enableDnsSupport: true
                 enableDnsHostnames: true
+                tags:
+                  Name: {{ .observed.composite.resource.metadata.name }}-vpc
+                  ManagedBy: crossplane
 
             ---
             # Internet Gateway
@@ -49,57 +53,44 @@ spec:
                 region: {{ .observed.composite.resource.spec.parameters.region }}
                 vpcIdSelector:
                   matchControllerRef: true
+                tags:
+                  Name: {{ .observed.composite.resource.metadata.name }}-igw
 
             ---
-            # NAT Gateway
-            apiVersion: ec2.aws.upbound.io/v1beta1
-            kind: NATGateway
-            metadata:
-              annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: nat-gateway
-              labels:
-                provider: aws
-                gateway-type: nat
-            spec:
-              forProvider:
-                region: {{ .observed.composite.resource.spec.parameters.region }}
-                allocationIdSelector:
-                  matchLabels:
-                    eip-type: nat
-                subnetIdSelector:
-                  matchLabels:
-                    subnet-type: private
-
-            ---
-            # NAT EIP
+            # NAT EIPs (One per AZ)
+            {{- $azs := list "us-east-1a" "us-east-1b" "us-east-1c" }}
+            {{- range $i, $az := $azs }}
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: EIP
             metadata:
               annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: nat-eip
+                gotemplating.fn.crossplane.io/composition-resource-name: nat-eip-{{ $az }}
               labels:
                 provider: aws
                 eip-type: nat
+                az: {{ $az }}
             spec:
               forProvider:
-                region: {{ .observed.composite.resource.spec.parameters.region }}
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
                 domain: vpc
-              managementPolicies:
-                - "*"
+                tags:
+                  Name: {{ $.observed.composite.resource.metadata.name }}-nat-eip-{{ $az }}
+              managementPolicies: ["*"]
+            ---
+            {{- end }}
 
             ---
             # Public Subnets
-            {{- $azs := list "us-east-1a" "us-east-1b" "us-east-1c" }}
             {{- range $i, $az := $azs }}
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: Subnet
             metadata:
               annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: public-subnet-{{ add $i 1 }}
+                gotemplating.fn.crossplane.io/composition-resource-name: public-subnet-{{ $az }}
               labels:
                 provider: aws
                 subnet-type: public
-                subnet-name: public-subnet-{{ add $i 1 }}
+                az: {{ $az }}
             spec:
               forProvider:
                 region: {{ $.observed.composite.resource.spec.parameters.region }}
@@ -108,22 +99,23 @@ spec:
                 mapPublicIpOnLaunch: true
                 vpcIdSelector:
                   matchControllerRef: true
+                tags:
+                  Name: {{ $.observed.composite.resource.metadata.name }}-public-{{ $az }}
             ---
             {{- end }}
 
             ---
             # Private Subnets
-            {{- $privateAzs := list "us-east-1a" "us-east-1b" "us-east-1c" }}
-            {{- range $i, $az := $privateAzs }}
+            {{- range $i, $az := $azs }}
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: Subnet
             metadata:
               annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: private-subnet-{{ add $i 1 }}
+                gotemplating.fn.crossplane.io/composition-resource-name: private-subnet-{{ $az }}
               labels:
                 provider: aws
                 subnet-type: private
-                subnet-name: private-subnet-{{ add $i 1 }}
+                az: {{ $az }}
             spec:
               forProvider:
                 region: {{ $.observed.composite.resource.spec.parameters.region }}
@@ -132,6 +124,36 @@ spec:
                 mapPublicIpOnLaunch: false
                 vpcIdSelector:
                   matchControllerRef: true
+                tags:
+                  Name: {{ $.observed.composite.resource.metadata.name }}-private-{{ $az }}
+            ---
+            {{- end }}
+
+            ---
+            # NAT Gateways (One per AZ)
+            {{- range $az := $azs }}
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: NATGateway
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: nat-gateway-{{ $az }}
+              labels:
+                provider: aws
+                gateway-type: nat
+                az: {{ $az }}
+            spec:
+              forProvider:
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
+                allocationIdSelector:
+                  matchLabels:
+                    az: {{ $az }}
+                    eip-type: nat
+                subnetIdSelector:
+                  matchLabels:
+                    az: {{ $az }}
+                    subnet-type: private
+                tags:
+                  Name: {{ $.observed.composite.resource.metadata.name }}-nat-{{ $az }}
             ---
             {{- end }}
 
@@ -150,7 +172,8 @@ spec:
                 region: {{ .observed.composite.resource.spec.parameters.region }}
                 vpcIdSelector:
                   matchControllerRef: true
-
+                tags:
+                  Name: {{ .observed.composite.resource.metadata.name }}-public-rt
             ---
             # Public Route to Internet Gateway
             apiVersion: ec2.aws.upbound.io/v1beta1
@@ -170,15 +193,14 @@ spec:
                 gatewayIdSelector:
                   matchLabels:
                     gateway-type: internet
-
             ---
             # Public Route Table Associations
-            {{- range $i, $az := $azs }}
+            {{- range $az := $azs }}
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: RouteTableAssociation
             metadata:
               annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: public-rt-assoc-{{ add $i 1 }}
+                gotemplating.fn.crossplane.io/composition-resource-name: public-rt-assoc-{{ $az }}
               labels:
                 provider: aws
             spec:
@@ -186,7 +208,8 @@ spec:
                 region: {{ $.observed.composite.resource.spec.parameters.region }}
                 subnetIdSelector:
                   matchLabels:
-                    subnet-name: public-subnet-{{ add $i 1 }}
+                    az: {{ $az }}
+                    subnet-type: public
                 routeTableIdSelector:
                   matchLabels:
                     table-type: public
@@ -194,49 +217,52 @@ spec:
             {{- end }}
 
             ---
-            # Private Route Table
+            # Private Route Tables (One per AZ)
+            {{- range $az := $azs }}
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: RouteTable
             metadata:
               annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: private-route-table
+                gotemplating.fn.crossplane.io/composition-resource-name: private-route-table-{{ $az }}
               labels:
                 provider: aws
                 table-type: private
+                az: {{ $az }}
             spec:
               forProvider:
-                region: {{ .observed.composite.resource.spec.parameters.region }}
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
                 vpcIdSelector:
                   matchControllerRef: true
-
+                tags:
+                  Name: {{ $.observed.composite.resource.metadata.name }}-private-rt-{{ $az }}
             ---
             # Private Route to NAT Gateway
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: Route
             metadata:
               annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: private-route-nat
+                gotemplating.fn.crossplane.io/composition-resource-name: private-route-nat-{{ $az }}
               labels:
                 provider: aws
             spec:
               forProvider:
-                region: {{ .observed.composite.resource.spec.parameters.region }}
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
                 routeTableIdSelector:
                   matchLabels:
+                    az: {{ $az }}
                     table-type: private
                 destinationCidrBlock: 0.0.0.0/0
                 natGatewayIdSelector:
                   matchLabels:
+                    az: {{ $az }}
                     gateway-type: nat
-
             ---
             # Private Route Table Associations
-            {{- range $i, $az := $privateAzs }}
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: RouteTableAssociation
             metadata:
               annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: private-rt-assoc-{{ add $i 1 }}
+                gotemplating.fn.crossplane.io/composition-resource-name: private-rt-assoc-{{ $az }}
               labels:
                 provider: aws
             spec:
@@ -244,9 +270,11 @@ spec:
                 region: {{ $.observed.composite.resource.spec.parameters.region }}
                 subnetIdSelector:
                   matchLabels:
-                    subnet-name: private-subnet-{{ add $i 1 }}
+                    az: {{ $az }}
+                    subnet-type: private
                 routeTableIdSelector:
                   matchLabels:
+                    az: {{ $az }}
                     table-type: private
             ---
             {{- end }}

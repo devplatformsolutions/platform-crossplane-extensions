@@ -495,6 +495,8 @@ spec:
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: VPC
             metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: vpc
               labels:
                 provider: aws
             spec:
@@ -509,6 +511,8 @@ spec:
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: InternetGateway
             metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: internet-gateway
               labels:
                 provider: aws
                 gateway-type: internet
@@ -523,6 +527,8 @@ spec:
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: NATGateway
             metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: nat-gateway
               labels:
                 provider: aws
                 gateway-type: nat
@@ -541,6 +547,8 @@ spec:
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: EIP
             metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: nat-eip
               labels:
                 provider: aws
                 eip-type: nat
@@ -558,6 +566,8 @@ spec:
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: Subnet
             metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: public-subnet-{{ add $i 1 }}
               labels:
                 provider: aws
                 subnet-type: public
@@ -580,6 +590,8 @@ spec:
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: Subnet
             metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-subnet-{{ add $i 1 }}
               labels:
                 provider: aws
                 subnet-type: private
@@ -600,6 +612,8 @@ spec:
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: RouteTable
             metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: public-route-table
               labels:
                 provider: aws
                 table-type: public
@@ -615,6 +629,8 @@ spec:
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: RouteTableAssociation
             metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: public-rt-assoc-{{ add $i 1 }}
               labels:
                 provider: aws
             spec:
@@ -634,6 +650,8 @@ spec:
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: RouteTable
             metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-route-table
               labels:
                 provider: aws
                 table-type: private
@@ -649,6 +667,8 @@ spec:
             apiVersion: ec2.aws.upbound.io/v1beta1
             kind: RouteTableAssociation
             metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-rt-assoc-{{ add $i 1 }}
               labels:
                 provider: aws
             spec:

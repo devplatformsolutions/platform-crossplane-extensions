@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
 - ../../providers/aws
 - ../../providers/provider-configs
+- ../../functions
 - ../../xrds/aws
 - ../../compositions/aws
 # Add other resources as needed

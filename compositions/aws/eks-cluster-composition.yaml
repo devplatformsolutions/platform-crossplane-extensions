@@ -366,13 +366,6 @@ spec:
                   ManagedBy: crossplane
               providerConfigRef:
                 name: default
-                  securityGroupIdSelector:
-                    matchControllerRef: true
-                tags:
-                  Name: {{ .observed.composite.resource.metadata.name }}-cluster
-                  ManagedBy: crossplane
-              providerConfigRef:
-                name: default
 
 
     - step: auto-ready

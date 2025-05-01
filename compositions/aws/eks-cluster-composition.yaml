@@ -279,10 +279,6 @@ spec:
             ---
             {{- end }}
 
-            #########################
-            # EKS Cluster Resources #
-            #########################
-            
             ---
             # EKS Cluster Role
             apiVersion: iam.aws.upbound.io/v1beta1

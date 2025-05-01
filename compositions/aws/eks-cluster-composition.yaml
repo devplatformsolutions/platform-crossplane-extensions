@@ -354,13 +354,13 @@ spec:
             spec:
               forProvider:
                 region: {{ .observed.composite.resource.spec.parameters.region }}
-                version: {{ .observed.composite.resource.spec.parameters.clusterVersion }}
+                version: "{{ .observed.composite.resource.spec.parameters.clusterVersion }}"
                 roleArnSelector:
                   matchLabels:
                     role-target: controlplane
                 vpcConfig:
-                  subnetIdSelector:
-                    matchControllerRef: true
+                  - subnetIdSelector:
+                      matchControllerRef: true
                 tags:
                   Name: {{ .observed.composite.resource.metadata.name }}-cluster
                   ManagedBy: crossplane

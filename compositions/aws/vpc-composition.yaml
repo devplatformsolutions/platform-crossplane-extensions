@@ -9,6 +9,7 @@ spec:
     apiVersion: aws.platform.example.org/v1alpha1
     kind: XVPC
   mode: Pipeline
+  writeConnectionSecretsToNamespace: crossplane-system
   pipeline:
     - step: go-templating
       functionRef:

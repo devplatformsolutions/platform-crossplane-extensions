@@ -340,6 +340,39 @@ spec:
                   ManagedBy: crossplane
               providerConfigRef:
                 name: default
+              
+            ---
+            # EKS Cluster
+            apiVersion: eks.aws.upbound.io/v1beta1
+            kind: Cluster
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: ekscluster
+              labels:
+                provider: aws
+                cluster-type: controlplane
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                version: {{ .observed.composite.resource.spec.parameters.clusterVersion }}
+                roleArnSelector:
+                  matchLabels:
+                    role-target: controlplane
+                vpcConfig:
+                  subnetIdSelector:
+                    matchControllerRef: true
+                tags:
+                  Name: {{ .observed.composite.resource.metadata.name }}-cluster
+                  ManagedBy: crossplane
+              providerConfigRef:
+                name: default
+                  securityGroupIdSelector:
+                    matchControllerRef: true
+                tags:
+                  Name: {{ .observed.composite.resource.metadata.name }}-cluster
+                  ManagedBy: crossplane
+              providerConfigRef:
+                name: default
 
 
     - step: auto-ready

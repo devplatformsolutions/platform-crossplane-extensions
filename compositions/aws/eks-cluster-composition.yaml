@@ -39,9 +39,9 @@ spec:
                       "Action": "sts:AssumeRole"
                     }]
                   }
-                managedPolicyArnsRefs:
-                  - name: AmazonEKSClusterPolicy
-                  - name: AmazonEKSServicePolicy
+                managedPolicyArns:
+                  - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+                  - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
                 tags:
                   Name: {{ .observed.composite.metadata.name }}-cluster-role
               providerConfigRef:

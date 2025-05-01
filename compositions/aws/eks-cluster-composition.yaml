@@ -367,7 +367,38 @@ spec:
               providerConfigRef:
                 name: default
 
-
+            ---
+            # EKS Node Group
+            apiVersion: eks.aws.upbound.io/v1beta1
+            kind: NodeGroup
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: eksnodegroup
+              labels:
+                provider: aws
+                cluster-type: nodegroup
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                clusterNameSelector:
+                  matchControllerRef: true
+                nodeRoleArnSelector:
+                  matchLabels:
+                    role-target: nodegroup
+                subnetIdSelector:
+                  matchLabels:
+                    subnet-type: private
+                scalingConfig:
+                  - desiredSize: 2
+                    maxSize: 4
+                    minSize: 1
+                instanceTypes: ["t3.medium"]
+                tags:
+                  Name: {{ .observed.composite.resource.metadata.name }}-node-group
+                  ManagedBy: crossplane
+              providerConfigRef:
+                name: default
+                
     - step: auto-ready
       functionRef: 
         name: function-auto-ready
@@ -421,41 +452,7 @@ spec:
   #   #       providerConfigRef:
   #   #         name: default
 
-  #   # # EKS Node Group
-  #   # - name: eksnodegroup
-  #   #   base:
-  #   #     apiVersion: eks.aws.upbound.io/v1beta1
-  #   #     kind: NodeGroup
-  #   #     metadata:
-  #   #       name: eks-node-group
-  #   #       namespace: crossplane-system
-  #   #     spec:
-  #   #       forProvider:
-  #   #         clusterNameSelector:
-  #   #           matchControllerRef: true
-  #   #         nodeRoleArnSelector:
-  #   #           matchControllerRef: true
-  #   #         subnetIdSelector:
-  #   #           matchControllerRef: true
-  #   #         scalingConfig:
-  #   #           - desiredSize: 2
-  #   #             maxSize: 4
-  #   #             minSize: 1
-  #   #         instanceTypes: ["t3.medium"]
-  #   #         tags:
-  #   #           Name: eks-node-group
-  #   #       providerConfigRef:
-  #   #         name: default
-  #   #   patches:
-  #   #     - type: FromCompositeFieldPath
-  #   #       fromFieldPath: spec.parameters.region
-  #   #       toFieldPath: spec.forProvider.region
-  #   #     - type: FromCompositeFieldPath
-  #   #       fromFieldPath: spec.parameters.nodeCount
-  #   #       toFieldPath: spec.forProvider.scalingConfig[0].desiredSize
-  #   #     - type: FromCompositeFieldPath
-  #   #       fromFieldPath: spec.parameters.nodeSize
-  #   #       toFieldPath: spec.forProvider.instanceTypes[0]
+
 
   #   # # EBS CSI Addon
   #   # - name: ebsaddon

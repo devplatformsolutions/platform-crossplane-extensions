@@ -43,7 +43,7 @@ spec:
                   - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
                   - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
                 tags:
-                  Name: {{ .observed.composite.metadata.name }}-cluster-role
+                  Name: {{ replace .observed.composite.metadata.name "." "-" }}-cluster-role
               providerConfigRef:
                 name: default
 

@@ -43,7 +43,7 @@ spec:
                   - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
                   - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
                 tags:
-                  Name: eks-cluster-role
+                  Name: {{ .observed.composite.resource.metadata.name }}-cluster-role
                   ManagedBy: crossplane
               providerConfigRef:
                 name: default

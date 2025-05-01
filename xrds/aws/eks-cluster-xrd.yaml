@@ -29,7 +29,10 @@ spec:
                       default: "1.28"
                     region:
                       type: string
-                      default: "us-west-2"
+                      default: us-east-1
+                    cidrBlock:
+                      type: string
+                      default: 10.0.0.0/16
                     nodeSize:
                       type: string
                       enum: ["small", "medium", "large"]
@@ -46,9 +49,8 @@ spec:
                       default: 1
                   required:
                     - region
+                    - cidrBlock
                     - clusterVersion
-              required:
-                - parameters
             status:
               type: object
               properties:

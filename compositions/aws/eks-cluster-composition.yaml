@@ -19,6 +19,271 @@ spec:
         source: Inline
         inline:
           template: |
+            # VPC
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: VPC
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: vpc
+              labels:
+                provider: aws
+                environment: production
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                cidrBlock: {{ .observed.composite.resource.spec.parameters.cidrBlock }}
+                enableDnsSupport: true
+                enableDnsHostnames: true
+                tags:
+                  Name: {{ .observed.composite.resource.metadata.name }}-vpc
+                  ManagedBy: crossplane
+
+            ---
+            # Internet Gateway
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: InternetGateway
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: internet-gateway
+              labels:
+                provider: aws
+                gateway-type: internet
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                vpcIdSelector:
+                  matchControllerRef: true
+                tags:
+                  Name: {{ .observed.composite.resource.metadata.name }}-igw
+
+            ---
+            # NAT EIPs (One per AZ)
+            {{- $azs := list "us-east-1a" "us-east-1b" "us-east-1c" }}
+            {{- range $i, $az := $azs }}
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: EIP
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: nat-eip-{{ $az }}
+              labels:
+                provider: aws
+                eip-type: nat
+                az: {{ $az }}
+            spec:
+              forProvider:
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
+                domain: vpc
+                tags:
+                  Name: {{ $.observed.composite.resource.metadata.name }}-nat-eip-{{ $az }}
+              managementPolicies: ["*"]
+            ---
+            {{- end }}
+
+            ---
+            # Public Subnets
+            {{- range $i, $az := $azs }}
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: Subnet
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: public-subnet-{{ $az }}
+              labels:
+                provider: aws
+                subnet-type: public
+                az: {{ $az }}
+            spec:
+              forProvider:
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
+                cidrBlock: 10.0.{{ add $i 1 }}.0/24
+                availabilityZone: {{ $az }}
+                mapPublicIpOnLaunch: true
+                vpcIdSelector:
+                  matchControllerRef: true
+                tags:
+                  Name: {{ $.observed.composite.resource.metadata.name }}-public-{{ $az }}
+            ---
+            {{- end }}
+
+            ---
+            # Private Subnets
+            {{- range $i, $az := $azs }}
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: Subnet
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-subnet-{{ $az }}
+              labels:
+                provider: aws
+                subnet-type: private
+                az: {{ $az }}
+            spec:
+              forProvider:
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
+                cidrBlock: 10.0.{{ add $i 10 }}.0/24
+                availabilityZone: {{ $az }}
+                mapPublicIpOnLaunch: false
+                vpcIdSelector:
+                  matchControllerRef: true
+                tags:
+                  Name: {{ $.observed.composite.resource.metadata.name }}-private-{{ $az }}
+            ---
+            {{- end }}
+
+            ---
+            # NAT Gateways (One per AZ)
+            {{- range $az := $azs }}
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: NATGateway
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: nat-gateway-{{ $az }}
+              labels:
+                provider: aws
+                gateway-type: nat
+                az: {{ $az }}
+            spec:
+              forProvider:
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
+                allocationIdSelector:
+                  matchLabels:
+                    az: {{ $az }}
+                    eip-type: nat
+                subnetIdSelector:
+                  matchLabels:
+                    az: {{ $az }}
+                    subnet-type: private
+                tags:
+                  Name: {{ $.observed.composite.resource.metadata.name }}-nat-{{ $az }}
+            ---
+            {{- end }}
+
+            ---
+            # Public Route Table
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: RouteTable
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: public-route-table
+              labels:
+                provider: aws
+                table-type: public
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                vpcIdSelector:
+                  matchControllerRef: true
+                tags:
+                  Name: {{ .observed.composite.resource.metadata.name }}-public-rt
+            ---
+            # Public Route to Internet Gateway
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: Route
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: public-route-igw
+              labels:
+                provider: aws
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                routeTableIdSelector:
+                  matchLabels:
+                    table-type: public
+                destinationCidrBlock: 0.0.0.0/0
+                gatewayIdSelector:
+                  matchLabels:
+                    gateway-type: internet
+            ---
+            # Public Route Table Associations
+            {{- range $az := $azs }}
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: RouteTableAssociation
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: public-rt-assoc-{{ $az }}
+              labels:
+                provider: aws
+            spec:
+              forProvider:
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
+                subnetIdSelector:
+                  matchLabels:
+                    az: {{ $az }}
+                    subnet-type: public
+                routeTableIdSelector:
+                  matchLabels:
+                    table-type: public
+            ---
+            {{- end }}
+
+            ---
+            # Private Route Tables (One per AZ)
+            {{- range $az := $azs }}
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: RouteTable
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-route-table-{{ $az }}
+              labels:
+                provider: aws
+                table-type: private
+                az: {{ $az }}
+            spec:
+              forProvider:
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
+                vpcIdSelector:
+                  matchControllerRef: true
+                tags:
+                  Name: {{ $.observed.composite.resource.metadata.name }}-private-rt-{{ $az }}
+            ---
+            # Private Route to NAT Gateway
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: Route
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-route-nat-{{ $az }}
+              labels:
+                provider: aws
+            spec:
+              forProvider:
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
+                routeTableIdSelector:
+                  matchLabels:
+                    az: {{ $az }}
+                    table-type: private
+                destinationCidrBlock: 0.0.0.0/0
+                natGatewayIdSelector:
+                  matchLabels:
+                    az: {{ $az }}
+                    gateway-type: nat
+            ---
+            # Private Route Table Associations
+            apiVersion: ec2.aws.upbound.io/v1beta1
+            kind: RouteTableAssociation
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: private-rt-assoc-{{ $az }}
+              labels:
+                provider: aws
+            spec:
+              forProvider:
+                region: {{ $.observed.composite.resource.spec.parameters.region }}
+                subnetIdSelector:
+                  matchLabels:
+                    az: {{ $az }}
+                    subnet-type: private
+                routeTableIdSelector:
+                  matchLabels:
+                    az: {{ $az }}
+                    table-type: private
+            ---
+            {{- end }}
+
+            #########################
+            # EKS Cluster Resources #
+            #########################
+            
+            ---
             # EKS Cluster Role
             apiVersion: iam.aws.upbound.io/v1beta1
             kind: Role

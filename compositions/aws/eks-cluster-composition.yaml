@@ -101,6 +101,8 @@ spec:
                   matchControllerRef: true
                 tags:
                   Name: {{ $.observed.composite.resource.metadata.name }}-public-{{ $az }}
+                  "kubernetes.io/cluster/{{ $.observed.composite.resource.metadata.name }}": "owned"
+                  "kubernetes.io/role/elb": "1"
             ---
             {{- end }}
 
@@ -126,6 +128,8 @@ spec:
                   matchControllerRef: true
                 tags:
                   Name: {{ $.observed.composite.resource.metadata.name }}-private-{{ $az }}
+                  "kubernetes.io/cluster/{{ $.observed.composite.resource.metadata.name }}": "owned"
+                  "kubernetes.io/role/internal-elb": "1"
             ---
             {{- end }}
 

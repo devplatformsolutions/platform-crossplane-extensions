@@ -427,56 +427,6 @@ spec:
         name: function-auto-ready
 
 
-
-  #   # # Security Group
-  #   # - name: clustersg
-  #   #   base:
-  #   #     apiVersion: ec2.aws.upbound.io/v1beta1
-  #   #     kind: SecurityGroup
-  #   #     metadata:
-  #   #       name: eks-cluster-sg
-  #   #       namespace: crossplane-system
-  #   #     spec:
-  #   #       forProvider:
-  #   #         vpcIdSelector:
-  #   #           matchControllerRef: true
-  #   #         ingress:
-  #   #           - fromPort: 443
-  #   #             toPort: 443
-  #   #             protocol: tcp
-  #   #             cidrBlocks: ["0.0.0.0/0"]
-  #   #         egress:
-  #   #           - fromPort: 0
-  #   #             toPort: 0
-  #   #             protocol: "-1"
-  #   #             cidrBlocks: ["0.0.0.0/0"]
-  #   #       providerConfigRef:
-  #   #         name: default
-  #   #   patches:
-  #   #     - type: FromCompositeFieldPath
-  #   #       fromFieldPath: spec.parameters.region
-  #   #       toFieldPath: spec.forProvider.region
-
-  #   # # Cluster Auth
-  #   # - name: clusterauth
-  #   #   base:
-  #   #     apiVersion: eks.aws.upbound.io/v1beta1
-  #   #     kind: ClusterAuth
-  #   #     metadata:
-  #   #       name: eks-cluster-auth
-  #   #       namespace: crossplane-system
-  #   #     spec:
-  #   #       forProvider:
-  #   #         clusterNameSelector:
-  #   #           matchControllerRef: true
-  #   #       writeConnectionSecretToRef:
-  #   #         name: eks-cluster-auth
-  #   #         namespace: crossplane-system
-  #   #       providerConfigRef:
-  #   #         name: default
-
-
-
   #   # # EBS CSI Addon
   #   # - name: ebsaddon
   #   #   base:

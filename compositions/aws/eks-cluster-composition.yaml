@@ -309,6 +309,21 @@ spec:
               providerConfigRef:
                 name: default
 
+            ---
+            # Cluster Auth
+            apiVersion: eks.aws.upbound.io/v1beta1
+            kind: ClusterAuth
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: clusterauth
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                clusterNameSelector:
+                  matchControllerRef: true
+              providerConfigRef:
+                name: default
+
             --- 
             # EKS node Group Role
             apiVersion: iam.aws.upbound.io/v1beta1

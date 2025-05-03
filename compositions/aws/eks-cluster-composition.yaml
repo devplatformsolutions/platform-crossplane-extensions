@@ -348,7 +348,7 @@ spec:
               
             ---
             # EKS Cluster
-            apiVersion: eks.aws.upbound.io/v1beta1
+            apiVersion: eks.aws.upbound.io/v1beta2
             kind: Cluster
             metadata:
               annotations:
@@ -377,7 +377,7 @@ spec:
 
             ---
             # EKS Node Group
-            apiVersion: eks.aws.upbound.io/v1beta1
+            apiVersion: eks.aws.upbound.io/v1beta2
             kind: NodeGroup
             metadata:
               annotations:

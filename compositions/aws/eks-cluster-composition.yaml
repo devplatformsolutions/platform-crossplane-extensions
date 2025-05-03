@@ -367,8 +367,8 @@ spec:
                   - subnetIdSelector:
                       matchControllerRef: true
                 accessConfig:
-                  - authenticationMode: 'API_AND_CONFIG_MAP'
-                    bootstrapClusterCreatorAdminPermissions: true
+                  authenticationMode: 'API_AND_CONFIG_MAP'
+                  bootstrapClusterCreatorAdminPermissions: true
                 tags:
                   Name: {{ .observed.composite.resource.metadata.name }}-cluster
                   ManagedBy: crossplane

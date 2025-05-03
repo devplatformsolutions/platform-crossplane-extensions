@@ -364,8 +364,8 @@ spec:
                   matchLabels:
                     role-target: controlplane
                 vpcConfig:
-                  - subnetIdSelector:
-                      matchControllerRef: true
+                  subnetIdSelector:
+                    matchControllerRef: true
                 accessConfig:
                   authenticationMode: 'API_AND_CONFIG_MAP'
                   bootstrapClusterCreatorAdminPermissions: true
@@ -397,9 +397,9 @@ spec:
                   matchLabels:
                     subnet-type: private
                 scalingConfig:
-                  - desiredSize: 2
-                    maxSize: 4
-                    minSize: 1
+                  desiredSize: 2
+                  maxSize: 4
+                  minSize: 1
                 instanceTypes: ["t3.medium"]
                 tags:
                   Name: {{ .observed.composite.resource.metadata.name }}-node-group

@@ -155,7 +155,7 @@ spec:
                 subnetIdSelector:
                   matchLabels:
                     az: {{ $az }}
-                    subnet-type: private
+                    subnet-type: public
                 tags:
                   Name: {{ $.observed.composite.resource.metadata.name }}-nat-{{ $az }}
             ---

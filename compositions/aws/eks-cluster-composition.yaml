@@ -448,6 +448,38 @@ spec:
               providerConfigRef:
                 name: default
 
+            ---
+            # EKS Pod Identity Addon
+            apiVersion: eks.aws.upbound.io/v1beta1
+            kind: Addon
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: eks-addon-pod-identity
+              labels:
+                provider: aws
+                addon-type: eks-pod-identity-agent
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                addonName: eks-pod-identity-agent
+                clusterNameSelector:
+                  matchControllerRef: true
+                configurationValues: |
+                  {
+                    "resources": {
+                      "requests": {
+                        "cpu": "100m",
+                        "memory": "128Mi"
+                      },
+                      "limits": {
+                        "cpu": "200m",
+                        "memory": "256Mi"
+                      }
+                    }
+                  }
+              providerConfigRef:
+                name: default
+
 
     - step: auto-ready
       functionRef: 

@@ -406,6 +406,48 @@ spec:
                   ManagedBy: crossplane
               providerConfigRef:
                 name: default
+            
+            ---
+            # EKS CoreDNS Addon
+            apiVersion: eks.aws.upbound.io/v1beta1
+            kind: Addon
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: eks-addon-coredns
+              labels:
+                provider: aws
+                addon-type: coredns
+            spec:
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                addonName: coredns
+                clusterNameSelector:
+                  matchControllerRef: true
+                configurationValues: |
+                  {
+                    "resources": {
+                      "requests": {
+                        "cpu": "100m",
+                        "memory": "70Mi"
+                      },
+                      "limits": {
+                        "cpu": "100m",
+                        "memory": "170Mi"
+                      }
+                    },
+                    "replicaCount": 1,
+                    "tolerations": [
+                      {
+                        "key": "purpose",
+                        "operator": "Equal",
+                        "value": "admin",
+                        "effect": "NoSchedule"
+                      }
+                    ]
+                  }
+              providerConfigRef:
+                name: default
+
 
     - step: auto-ready
       functionRef: 

@@ -1,15 +1,3 @@
-# apiVersion: apiextensions.crossplane.io/v1
-# kind: CompositeResourceDefinition
-# metadata:
-#   name: awsec2dynamodbinstances.devplatform.io
-# spec:
-#   group: devplatform.io
-#   versions:
-#     - name: v1alpha1
-#       served: true
-#       referenceable: true
-
-
 - op: replace
   path: /metadata/name
   value: awsec2dynamodbinstances.devplatforms.io

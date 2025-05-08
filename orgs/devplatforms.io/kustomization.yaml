@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
 - ../../providers/aws
+- ../../providers/k8s
 - ../../providers/provider-configs
 - ../../functions
 - ../../xrds/aws

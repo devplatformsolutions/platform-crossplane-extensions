@@ -513,7 +513,7 @@ spec:
                 secretRef:
                   namespace: {{ .observed.composite.resource.spec.writeConnectionSecretToRef.namespace | default "crossplane-system" }}
                   name:      {{ .observed.composite.resource.metadata.uid }}-kubeconfig
-                  key:       config
+                  key:       kubeconfig
             
             ---
             # Test NGINX Deployment using eks-in-cluster

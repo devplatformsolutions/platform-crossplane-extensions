@@ -546,6 +546,32 @@ spec:
               providerConfigRef:
                 name: eks-in-cluster
 
+            ---
+            # Expose nginx via AWS ELB
+            apiVersion: kubernetes.crossplane.io/v1alpha2
+            kind: Object
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: test-nginx-svc
+            spec:
+              forProvider:
+                manifest:
+                  apiVersion: v1
+                  kind: Service
+                  metadata:
+                    name: test-nginx
+                    namespace: default
+                  spec:
+                    type: LoadBalancer
+                    selector:
+                      app: nginx
+                    ports:
+                      - port: 80
+                        targetPort: 80
+                        protocol: TCP
+              providerConfigRef:
+                name: eks-in-cluster
+                
     - step: auto-ready
       functionRef: 
         name: function-auto-ready

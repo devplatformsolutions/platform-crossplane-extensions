@@ -498,44 +498,54 @@ spec:
               writeConnectionSecretToRef:
                 name: {{ .observed.composite.resource.metadata.uid }}-kubeconfig
                 namespace: {{ .observed.composite.resource.spec.writeConnectionSecretToRef.namespace | default "crossplane-system" }}
+            
+            ---
+            # In-cluster Kubernetes ProviderConfig
+            apiVersion: kubernetes.crossplane.io/v1alpha1
+            kind: ProviderConfig
+            metadata:
+              name: eks-in-cluster
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: eks-k8s-provider
+            spec:
+              credentials:
+                source: Secret
+                secretRef:
+                  namespace: {{ .observed.composite.resource.spec.writeConnectionSecretToRef.namespace | default "crossplane-system" }}
+                  name:      {{ .observed.composite.resource.metadata.uid }}-kubeconfig
+                  key:       config
+            
+            ---
+            # Test NGINX Deployment using eks-in-cluster
+            apiVersion: kubernetes.crossplane.io/v1alpha1
+            kind: Object
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: test-nginx
+            spec:
+              forProvider:
+                manifest:
+                  apiVersion: apps/v1
+                  kind: Deployment
+                  metadata:
+                    name: test-nginx
+                    namespace: default
+                  spec:
+                    replicas: 1
+                    selector:
+                      matchLabels:
+                        app: nginx
+                    template:
+                      metadata:
+                        labels:
+                          app: nginx
+                      spec:
+                        containers:
+                          - name: nginx
+                            image: nginx:latest
+              providerConfigRef:
+                name: eks-in-cluster
 
     - step: auto-ready
       functionRef: 
         name: function-auto-ready
-
-
-           # ---
-            # # Cluster Auth
-            # apiVersion: eks.aws.upbound.io/v1beta1
-            # kind: ClusterAuth
-            # metadata:
-            #   annotations:
-            #     gotemplating.fn.crossplane.io/composition-resource-name: clusterauth
-            # spec:
-            #   forProvider:
-            #     region: {{ .observed.composite.resource.spec.parameters.region }}
-            #     clusterNameSelector:
-            #       matchControllerRef: true
-            #   providerConfigRef:
-            #     name: default
-
-
-  #   # # EBS CSI Addon
-  #   # - name: ebsaddon
-  #   #   base:
-  #   #     apiVersion: eks.aws.upbound.io/v1beta1
-  #   #     kind: Addon
-  #   #     metadata:
-  #   #       name: ebs-csi-driver
-  #   #       namespace: crossplane-system
-  #   #     spec:
-  #   #       forProvider:
-  #   #         addonName: aws-ebs-csi-driver
-  #   #         clusterNameSelector:
-  #   #           matchControllerRef: true
-  #   #       providerConfigRef:
-  #   #         name: default
-  #   #   patches:
-  #   #     - type: FromCompositeFieldPath
-  #   #       fromFieldPath: spec.parameters.region
-  #   #       toFieldPath: spec.forProvider.region

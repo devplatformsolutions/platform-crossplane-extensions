@@ -3,4 +3,4 @@ kind: Provider
 metadata:
   name: upbound-provider-k8s
 spec:
-  package: provider xpkg.upbound.io/upbound/provider-kubernetes:v0.18.0
+  package: xpkg.upbound.io/upbound/provider-kubernetes:v0.18.0

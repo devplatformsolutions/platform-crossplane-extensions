@@ -479,7 +479,25 @@ spec:
                   }
               providerConfigRef:
                 name: default
-
+            
+            ---
+            # ClusterAuth writes kubeconfig into a Secret
+            apiVersion: eks.aws.upbound.io/v1beta2
+            kind: ClusterAuth
+            metadata:
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: clusterauth
+            spec:
+              deletionPolicy: Delete
+              providerConfigRef:
+                name: default
+              forProvider:
+                region: {{ .observed.composite.resource.spec.parameters.region }}
+                clusterNameSelector:
+                  matchControllerRef: true
+              writeConnectionSecretToRef:
+                name: {{ .observed.composite.resource.metadata.uid }}-kubeconfig
+                namespace: {{ .observed.composite.resource.spec.writeConnectionSecretToRef.namespace | default "crossplane-system" }}
 
     - step: auto-ready
       functionRef: 

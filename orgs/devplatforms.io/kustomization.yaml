@@ -6,44 +6,44 @@ resources:
 - ../../providers/k8s
 - ../../providers/provider-configs
 - ../../functions
-- ../../xrds/aws
-- ../../compositions/aws
+# - ../../xrds/aws
+# - ../../compositions/aws
 # Add other resources as needed
 
-patches:
-- path: patches/xrd-variables.yaml
-  target:
-    group: apiextensions.crossplane.io
-    kind: CompositeResourceDefinition
-    name: awsec2dynamodbinstances.myorg.io
-    version: v1
-- path: patches/composition-variables.yaml
-  target:
-    group: apiextensions.crossplane.io
-    kind: Composition
-    name: awsec2dynamodbinstances.myorg.io
-    version: v1
-- path: patches/eks-xrd-variables.yaml
-  target:
-    group: apiextensions.crossplane.io
-    kind: CompositeResourceDefinition
-    name: xeksclusters.aws.platform.example.org
-    version: v1
-- path: patches/eks-composition-variables.yaml
-  target:
-    group: apiextensions.crossplane.io
-    kind: Composition
-    name: eks.aws.platform.example.org
-    version: v1
-- path: patches/vpc-xrd-variables.yaml
-  target:
-    group: apiextensions.crossplane.io
-    kind: CompositeResourceDefinition
-    name: xvpcs.aws.platform.example.org
-    version: v1
-- path: patches/vpc-composition-variables.yaml
-  target:
-    group: apiextensions.crossplane.io
-    kind: Composition
-    name: vpc.aws.platform.example.org
-    version: v1
+# patches:
+# - path: patches/xrd-variables.yaml
+#   target:
+#     group: apiextensions.crossplane.io
+#     kind: CompositeResourceDefinition
+#     name: awsec2dynamodbinstances.myorg.io
+#     version: v1
+# - path: patches/composition-variables.yaml
+#   target:
+#     group: apiextensions.crossplane.io
+#     kind: Composition
+#     name: awsec2dynamodbinstances.myorg.io
+#     version: v1
+# - path: patches/eks-xrd-variables.yaml
+#   target:
+#     group: apiextensions.crossplane.io
+#     kind: CompositeResourceDefinition
+#     name: xeksclusters.aws.platform.example.org
+#     version: v1
+# - path: patches/eks-composition-variables.yaml
+#   target:
+#     group: apiextensions.crossplane.io
+#     kind: Composition
+#     name: eks.aws.platform.example.org
+#     version: v1
+# - path: patches/vpc-xrd-variables.yaml
+#   target:
+#     group: apiextensions.crossplane.io
+#     kind: CompositeResourceDefinition
+#     name: xvpcs.aws.platform.example.org
+#     version: v1
+# - path: patches/vpc-composition-variables.yaml
+#   target:
+#     group: apiextensions.crossplane.io
+#     kind: Composition
+#     name: vpc.aws.platform.example.org
+#     version: v1

@@ -3,4 +3,4 @@ kind: Provider
 metadata:
   name: upbound-provider-aws-kms
 spec:
-  package: xpkg.upbound.io/upbound/provider-aws-kms:v1.21.2
+  package: xpkg.upbound.io/upbound/provider-aws-kms:v1.22.0
